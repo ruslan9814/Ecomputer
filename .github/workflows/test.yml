@@ -1,21 +1,29 @@
 name: "test"
 
 on:
- push:
- pull_request:
+  push:
+  pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu:latest
+    runs-on: ubuntu-latest
     steps:
       - name: Setup Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@4.0.0
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Project Build
-        run: dotnet build ./test.sln 
-      - name: Project Test
-        run: dotnet test ./test.sln 
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - name: Build Project
+        run: dotnet build ./test.sln --no-restore
+      - name: Run Tests
+        run: dotnet test ./test.sln --no-build
+
       
