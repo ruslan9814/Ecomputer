@@ -45,17 +45,25 @@ jobs:
         if: success()
         uses: appleboy/telegram-action@master
         with:
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "✅ Сборка завершена успешно!"
-          debug: true
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ✅ Сборка завершена успешно!
+            Репозиторий: ${{ github.repository }}
+            Ветка: ${{ github.ref_name }}
+            Коммит: ${{ github.sha }}
+            Ссылка на лог: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       # Шаг 8: Уведомление Telegram о неудачной сборке
       - name: Telegram Notification (Failure)
         if: failure()
         uses: appleboy/telegram-action@master
         with:
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "❌ Ошибка сборки! Проверьте лог."
-          debug: true
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ❌ Ошибка сборки!
+            Репозиторий: ${{ github.repository }}
+            Ветка: ${{ github.ref_name }}
+            Коммит: ${{ github.sha }}
+            Ссылка на лог: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
