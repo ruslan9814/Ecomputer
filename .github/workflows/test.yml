@@ -8,14 +8,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-
     steps:
       # Шаг 1: Клонирование репозитория
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Log Telegram Token and Chat ID
+        run: |
+          echo "Telegram Token: ${{ secrets.TELEGRAM_TOKEN }}"
+          echo "Telegram Chat ID: ${{ secrets.TELEGRAM_CHAT_ID }}"
+
+      - name: Run tests
+        run: dotnet test
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
       # Шаг 2: Установка .NET SDK
       - name: Setup .NET
