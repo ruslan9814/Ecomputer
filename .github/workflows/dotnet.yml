@@ -40,3 +40,20 @@ jobs:
       - name: Run Tests
         run: dotnet test ./test.sln --no-build
 
+      # Шаг 7: Уведомление Telegram об успешной сборке
+      - name: Telegram Notification (Success)
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_BOT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: "✅ Сборка завершена успешно!"
+
+      # Шаг 8: Уведомление Telegram о неудачной сборке
+      - name: Telegram Notification (Failure)
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_BOT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: "❌ Ошибка сборки! Проверьте лог."
