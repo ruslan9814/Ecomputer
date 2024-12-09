@@ -48,6 +48,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_BOT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: "✅ Сборка завершена успешно!"
+          debug: true
 
       # Шаг 8: Уведомление Telegram о неудачной сборке
       - name: Telegram Notification (Failure)
@@ -57,3 +58,4 @@ jobs:
           to: ${{ secrets.TELEGRAM_BOT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: "❌ Ошибка сборки! Проверьте лог."
+          debug: true
