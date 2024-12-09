@@ -47,7 +47,11 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_BOT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "✅ Сборка завершена успешно!"
+          message: |
+            ✅ Сборка завершена успешно!
+            Репозиторий: ${{ github.repository }}
+            Ветка: ${{ github.ref_name }}
+            Коммит: ${{ github.sha }}
 
       # Шаг 8: Уведомление Telegram о неудачной сборке
       - name: Telegram Notification (Failure)
@@ -56,4 +60,9 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_BOT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "❌ Ошибка сборки! Проверьте лог."
+          message: |
+            ❌ Ошибка сборки!
+            Репозиторий: ${{ github.repository }}
+            Ветка: ${{ github.ref_name }}
+            Коммит: ${{ github.sha }}
+            Проверьте лог на GitHub Actions.
