@@ -52,6 +52,7 @@ jobs:
             Репозиторий: ${{ github.repository }}
             Ветка: ${{ github.ref_name }}
             Коммит: ${{ github.sha }}
+            Ссылка на лог: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       # Шаг 8: Уведомление Telegram о неудачной сборке
       - name: Telegram Notification (Failure)
@@ -65,4 +66,4 @@ jobs:
             Репозиторий: ${{ github.repository }}
             Ветка: ${{ github.ref_name }}
             Коммит: ${{ github.sha }}
-            Проверьте лог на GitHub Actions.
+            Ссылка на лог: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
