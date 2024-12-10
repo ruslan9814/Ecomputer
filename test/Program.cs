@@ -1,4 +1,5 @@
 using Carter;
+using Castle.Core.Smtp;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using test.Database;
@@ -21,6 +22,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddCarter();

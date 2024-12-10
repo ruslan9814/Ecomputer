@@ -9,9 +9,6 @@ public class UserRepository(ApplicationDbContext dbContext, IDistributedCache ca
     BaseRepository<User>(dbContext, cache), IUserRepository
 {
 
-    private readonly ApplicationDbContext _dbContext = dbContext;
-    private readonly IDistributedCache _cache = cache;
-
     public async Task<bool> UserExistsAsync(int userId)
     {
         return await _dbContext.Users

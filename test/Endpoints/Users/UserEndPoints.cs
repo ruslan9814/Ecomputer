@@ -2,24 +2,21 @@
 
 using Carter;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using test.Database;
 using test.Database.Repositories.Interfaces;
-using test.Endpoints.Carts.Models;
 using test.Endpoints.Users.Models;
 using test.Models;
 
-namespace test.EndPoints;
+namespace test.Endpoints.Users;
 
 public sealed class UserEndPoints : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
         var user = app.MapGroup("api/users");
-        user.MapGet("{UserId}/", GetUsers);           
-        user.MapPost("/", AddUsers);                
-        user.MapPut("{UserId}/", UpdateUsers);     
-        user.MapDelete("{UserId}/", RemoveUsers); 
+        user.MapGet("{UserId}/", GetUsers);
+        user.MapPost("/", AddUsers);
+        user.MapPut("{UserId}/", UpdateUsers);
+        user.MapDelete("{UserId}/", RemoveUsers);
     }
 
 
@@ -54,11 +51,7 @@ public sealed class UserEndPoints : CarterModule
         }
 
         var cart = new Cart();
-        var user = new User
-        {
-            Name = userRequest.Username,
-            Cart = cart
-        };
+        var user = new User(0, userRequest.Username, cart);
 
         await _user.AddAsync(user);
 

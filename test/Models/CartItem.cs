@@ -1,6 +1,5 @@
-﻿using Microsoft.Identity.Client;
+﻿namespace test.Models;
 
-namespace test.Models;
 
 public class CartItem
 {
@@ -10,6 +9,6 @@ public class CartItem
     public int ProductId { get; set; }
     public Product Product { get; set; }
 
-    public int CartId { get; set; } 
+    public int CartId { get; set; }
     public Cart Cart { get; set; }
 }
