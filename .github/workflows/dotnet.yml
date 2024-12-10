@@ -49,7 +49,7 @@ jobs:
 
       # Шаг 6: Запуск тестов
       - name: Run Tests
-        run: dotnet test ./test.sln --no-build
+        run: dotnet test ./test.sln 
 
       # Шаг 7: Уведомление Telegram об успешной сборке
       - name: Telegram Notification (Success)
