@@ -1,9 +1,12 @@
-﻿namespace test.Database.Repositories.Interfaces;
+﻿using Test.Models.Core;
 
-public interface IBaseRepository<TEntity>
+namespace Test.Database.Repositories.Interfaces;
+
+public interface IBaseRepository<TEntity> where TEntity : EntityBase
 {
-    public Task<TEntity> GetAsync(int id);
-    public Task AddAsync(TEntity entity);
-    public Task UpdateAsync(TEntity entity);
-    public Task<bool> DeleteAsync(int id);
+    Task<bool> IsExistAsync(int id);
+    Task<TEntity> GetAsync(int id); 
+    Task AddAsync(TEntity entity); 
+    Task UpdateAsync(TEntity entity); 
+    Task<bool> DeleteAsync(int id);
 }

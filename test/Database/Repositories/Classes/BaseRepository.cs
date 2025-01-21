@@ -1,64 +1,63 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
-using test.Database.Repositories.Interfaces;
+using Test.Cache;
+using Test.Database.Repositories.Interfaces;
+using Test.Models.Core;
 
-namespace test.Database.Repositories.Classes;
+namespace Test.Database.Repositories.Classes;
 
-public abstract class BaseRepository<TEntity>(ApplicationDbContext dbContext, IDistributedCache cache) :
-    IBaseRepository<TEntity> where TEntity : class
+// TODO: Сделать базовый класс и
+// создать класс для сохранения
+// в базу данных и вызывать этот класс в endpoints,
+//также создать папку cacheService и там класс чтобы вызывать через нее JsonSerialize
+public abstract class BaseRepository<TEntity>(ApplicationDbContext dbContext, ICacheEntityService cache) :
+    IBaseRepository<TEntity> where TEntity : EntityBase
 {
 
     protected readonly ApplicationDbContext _dbContext = dbContext;
-    protected readonly IDistributedCache _cache = cache;
+    protected readonly ICacheEntityService _cache = cache;
 
-    public async Task AddAsync(TEntity entity)
-    {
+    public async Task AddAsync(TEntity entity) => 
         await _dbContext.Set<TEntity>().AddAsync(entity);
-        await _dbContext.SaveChangesAsync();//////////////////////////////////////////
-    }
 
     public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _dbContext.Set<TEntity>().FindAsync(id);
-        if (entity == null)
+        if (entity is null)
         {
             return false;
         }
 
-        _cache.Remove($"{typeof(TEntity).Name}, {id}");
+        _cache.Remove(entity);
         _dbContext.Set<TEntity>().Remove(entity);
-        await _dbContext.SaveChangesAsync();//////////////////////////////////////////
         return true;
     }
 
+
     public async Task<TEntity> GetAsync(int id)
     {
-        var cacheKey = $"{typeof(TEntity).Name}, {id}";
-        var cachedEntity = await _cache.GetAsync(cacheKey);
+        var entity = await _cache.GetAsync<TEntity>(id);
 
-        if (cachedEntity != null)
+        if (entity is not null)
         {
-            _cache.Refresh(cacheKey);
-            return JsonSerializer.Deserialize<TEntity>(cachedEntity);
+            await _cache.RefreshAsync(entity);
+            return entity;
         }
 
-        var entity = await _dbContext.Set<TEntity>().FindAsync(id);
+        entity = await _dbContext.Set<TEntity>().FindAsync(id)
+            ?? throw new NullReferenceException();
 
-        if (entity != null)
-        {
-            var options = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            };
-            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(entity), options);
-        }
+        await _cache.SetAsync(entity);
+
         return entity;
+
     }
 
     public async Task UpdateAsync(TEntity entity)
     {
         _dbContext.Set<TEntity>().Update(entity);
-        await _dbContext.SaveChangesAsync();//////////////////////////////////////////
+        await _cache.SetAsync(entity);
     }
+
+    public async Task<bool> IsExistAsync(int id) =>
+        await _dbContext.Set<TEntity>().AnyAsync(u => u.Id == id); 
 }

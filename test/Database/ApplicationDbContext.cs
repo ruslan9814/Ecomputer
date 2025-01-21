@@ -1,16 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using test.Models;
+using Test.Models;
 
-namespace test.Database;
+namespace Test.Database;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Cart> Carts { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    { }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder) => 
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(ApplicationDbContext).Assembly);
 }

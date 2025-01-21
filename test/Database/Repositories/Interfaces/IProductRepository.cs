@@ -1,11 +1,11 @@
 ﻿using System.Security.Principal;
-using test.Models;
+using Test.Models;
 
-namespace test.Database.Repositories.Interfaces;
+namespace Test.Database.Repositories.Interfaces;
 
 public interface IProductRepository : IBaseRepository<Product>
 {
-    Task<bool> IsProductInStockAsync(ICartItemRepository _cartItem, int productId);
-    Task<int> GetProductStockCountAsync(ICartItemRepository _cartItem, int productId);
-    Task<IEnumerable<Product>> GetProductsByPriceRangeAsync(decimal minPrice, decimal maxPrice);
+    Task<bool> IsProductInStockAsync(int productId); 
+    Task<int> GetProductStockCountAsync(int productId);
+    Task<IEnumerable<Product>> GetProductsAsync(decimal minPrice, decimal maxPrice);
 }

@@ -1,23 +1,37 @@
-﻿namespace test.Models;
+﻿using Test.Models.Core;
 
-public class User
+namespace Test.Models;
+
+public class User : EntityBase
 {
-    public User(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public string HashedPassword { get; set; }
+    public Cart? Cart { get; set; }
+    public Role Role { get; set; }
 
-    public User(int id, string name, Cart cart)
+    public User()
     {
-        Id = id;
+        
+    }
+    public User(string name, Cart cart)
+    {
         Name = name;
         Cart = cart;
     }
 
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public Cart? Cart { get; set; }
-    public Role Role { get; set; }
-}
+    public User(string name, string email, string hashedPassword)
+    {
+        Name = name;
+        Email = email;
+        HashedPassword = hashedPassword;
+    }
 
+    public User(int id, string name, string email, string hashedPassword) : base(id) 
+    {
+        Id = id;    
+        Name = name;
+        Email = email;
+        HashedPassword = hashedPassword;
+    }
+}

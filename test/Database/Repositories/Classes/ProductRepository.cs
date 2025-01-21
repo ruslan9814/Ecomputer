@@ -1,46 +1,33 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using test.Database.Repositories.Interfaces;
-using test.Models;
+using Test.Cache;
+using Test.Database.Repositories.Interfaces;
+using Test.Models;
 
-namespace test.Database.Repositories.Classes;
+namespace Test.Database.Repositories.Classes;
 
-public class ProductRepository(ApplicationDbContext dbContext, IDistributedCache cache) :
+public class ProductRepository(ApplicationDbContext dbContext, ICacheEntityService cache) :
     BaseRepository<Product>(dbContext, cache), IProductRepository
 {
+    public async Task<IEnumerable<Product>> GetProductsAsync(decimal minPrice, decimal maxPrice) => 
+        await _dbContext.Products
+            .Where(p => p.Price >= minPrice && p.Price <= maxPrice)
+            .ToListAsync();
 
-    private readonly ApplicationDbContext _dbContext = dbContext;
-    private readonly IDistributedCache _cache = cache;
-
-    public async Task<IEnumerable<Product>> GetProductsByPriceRangeAsync(decimal minPrice, decimal maxPrice)
+    public async Task<int> GetProductStockCountAsync(int productId)
     {
-        var prod = await _dbContext.Products.Where(p => p.Price >= minPrice && p.Price <= maxPrice).ToListAsync();
-        if (prod == null)
-        {
-            return [];
-        }
-        return prod;
+        var product = await _dbContext.Products
+            .FirstAsync(p => p.Id == productId);
+
+        return product.Quantity;
     }
 
-    public async Task<int> GetProductStockCountAsync(ICartItemRepository _cartItem, int productId)
+    public async Task<bool> IsProductInStockAsync(int productId)
     {
-        var prod = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
-        if (prod == null)
-        {
-            return 0;
-        }
-        return prod.Quantity;
-    }
+        var quantity = await _dbContext.Products
+             .Where(x => x.Id == productId)
+            .Select(x => x.Quantity).FirstAsync();
 
-
-    public async Task<bool> IsProductInStockAsync(ICartItemRepository _cartItem, int productId)
-    {
-        var prod = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
-
-        if (prod == null || prod.Quantity <= 0)
-        {
-            return false;
-        }
-        return true;
+        return quantity > 0;
     }
 }

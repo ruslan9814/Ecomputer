@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Moq;
-using test.Database.Repositories.Interfaces;
-using test.Models;
+using Test.Database.Repositories.Interfaces;
+using Test.Models;
 
 
 namespace UnitTests;
@@ -14,7 +14,7 @@ public class UserRepositoryTest
     public async Task AddAsync(int id, string name)
     {
         var mockUserRepository = new Mock<IUserRepository>();
-        var user = new User(id, name);
+        var user = new User(name);
 
         mockUserRepository
             .Setup(repository => repository.AddAsync(It.IsAny<User>()))
@@ -39,10 +39,10 @@ public class UserRepositoryTest
     {
         var mockUserRepository = new Mock<IUserRepository>();
 
-        var user = new User(id, name);
+        var user = new User(name);
 
         mockUserRepository
-             .Setup(repository => repository.DeleteAsync(user.Id))
+             .Setup(repository => repository.DeleteAsync(id))
              .Returns(Task.FromResult(true));
 
         var userRepository = mockUserRepository.Object;
@@ -63,15 +63,15 @@ public class UserRepositoryTest
     {
         var mockUserRepository = new Mock<IUserRepository>();
 
-        var user = new User(id, name);
+        var user = new User(name);
 
         mockUserRepository.Setup(repository =>
-             repository.GetAsync(user.Id))
+             repository.GetAsync(id))
             .ReturnsAsync(user);
 
         var userRepository = mockUserRepository.Object;
 
-        var result = await userRepository.GetAsync(user.Id);
+        var result = await userRepository.GetAsync(id);
 
         mockUserRepository.Verify(repo => repo.GetAsync(It.Is<int>(i => i == user.Id)), Times.Once);
 

@@ -1,59 +1,23 @@
 ﻿using Carter;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using test.Database.Repositories.Interfaces;
-using test.Endpoints.CartItems.Models;
-using test.Endpoints.Carts.Models;
-using test.Models;
+using Test.Services.Cart;
 
-namespace test.Endpoints.Carts;
+namespace Test.Endpoints.Carts;
 
-public sealed class CartEndPoints : CarterModule
+public sealed class CartEndpoints : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var cart = app.MapGroup("api/carts");
-        //cart.MapGet("/{cartId}", CartExistsAsync);
-        cart.MapGet("/{cartId}", GetCart);
+        var cart = app.MapGroup("api/carts").RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
+
+        cart.MapGet("{cartId}", GetCart);
     }
 
-    public async Task<IResult> GetCart(int cartId, [FromServices] ICartRepository cartRepository)
+    private static async Task<IResult> GetCart([FromRoute] int cartId, [FromServices] CartService cartService)
     {
-        var cart = await cartRepository.GetAsync(cartId);
-
-        if (cart == null)
-        {
-            return Results.NotFound(new { Message = "Cart not found" });
-        }
-
-        if (cart.User == null)
-        {
-            return Results.NotFound(new { Message = "User not found for the cart" });
-        }
-        cart.Products ??= [];
-
-        return Results.Ok(new CartResponse
-        {
-            Id = cart.Id,
-            UserId = cart.UserId,
-            Items = cart.Products.Select(item => new CartItemResponse
-            {
-                Id = item.Id,
-                ProductId = item.ProductId,
-                ProductName = item.Product?.Name,
-                Quantity = item.Quantity,
-                Price = item.Product.Price,
-            }).ToList(),
-            TotalSum = cart.TotalSum
-        });
+        var cart = await cartService.GetCart(cartId);
+        return cart is null ? Results.NotFound(new { Message = "Cart not found" }) 
+            : Results.Ok(cart);
     }
 
-
-
-    public async Task<IResult> CartExistsAsync(int cartId, [FromServices] ICartRepository cartRepository)
-    {
-        var exist = await cartRepository.CartExistsAsync(cartId);
-
-        return Results.Ok(exist);
-    }
 }

@@ -1,8 +1,8 @@
-﻿using test.Models;
+﻿using Test.Models;
 
-namespace test.Database.Repositories.Interfaces;
+namespace Test.Database.Repositories.Interfaces;
 
-public interface ICartItemRepository : IBaseRepository<CartItem>
+public interface ICartItemRepository : IBaseRepository<CartItem> 
 {
     Task AddToCartAsync(int cartId, int productId, int quantity);
     Task RemoveFromCartAsync(int cartId, int porductId);

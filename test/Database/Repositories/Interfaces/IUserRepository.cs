@@ -1,8 +1,8 @@
-﻿using test.Models;
+﻿using Test.Models;
 
-namespace test.Database.Repositories.Interfaces;
+namespace Test.Database.Repositories.Interfaces;
 
 public interface IUserRepository : IBaseRepository<User>
 {
-    Task<bool> UserExistsAsync(int id);
+    Task<User> GetUserByEmailAsync(string email);
 }

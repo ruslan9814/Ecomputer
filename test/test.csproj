@@ -10,7 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Carter" Version="8.0.0" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -25,9 +29,15 @@
     <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
-            
+
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <Folder Include="CQRS\Carts\Commands\" />
+    <Folder Include="CQRS\Carts\Queries\" />
+    <Folder Include="CQRS\Products\Commands\" />
+    <Folder Include="CQRS\Products\Queries\" />
+    <Folder Include="CQRS\Users\Commands\" />
+    <Folder Include="CQRS\Users\Queries\" />
+    <Folder Include="Services\Cart\Requests\" />
   </ItemGroup>
 
 </Project>

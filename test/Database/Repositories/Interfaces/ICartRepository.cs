@@ -1,9 +1,5 @@
-﻿using test.Models;
+﻿using Test.Models;
 
-namespace test.Database.Repositories.Interfaces;
+namespace Test.Database.Repositories.Interfaces;
 
-public interface ICartRepository : IBaseRepository<Cart>
-{
-    Task<bool> CartExistsAsync(int cartId);
-    Task<Cart> GetAsync(int cartId);
-}
+public interface ICartRepository : IBaseRepository<Cart>;

@@ -1,22 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using test.Database.Repositories.Interfaces;
-using test.Models;
+using Test.Cache;
+using Test.Database.Repositories.Interfaces;
+using Test.Models;
 
-namespace test.Database.Repositories.Classes;
+namespace Test.Database.Repositories.Classes;
 
-public class CartRepository(ApplicationDbContext dbContext, IDistributedCache cache) :
+public class CartRepository(ApplicationDbContext dbContext, ICacheEntityService cache) :
     BaseRepository<Cart>(dbContext, cache), ICartRepository
 {
-    public Task<bool> CartExistsAsync(int cartId)
+    public new async Task<Cart> GetAsync(int cartId)
     {
-        throw new NotImplementedException();
-    }
-
-    public new async Task<Cart> GetAsync(int cartId) => 
-        await _dbContext.Carts
-            .Include(c => c.User)
-            .Include(c => c.Products)
+        var cart = await _dbContext.Carts
+            .Include(c => c.Items)
             .ThenInclude(p => p.Product)
             .FirstAsync(c => c.Id == cartId);
+
+        return cart;
+    }
 }

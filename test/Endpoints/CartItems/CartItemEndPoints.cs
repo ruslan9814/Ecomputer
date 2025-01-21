@@ -1,71 +1,69 @@
 ﻿using Carter;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using test.Database;
-using test.Database.Repositories.Interfaces;
-using test.Endpoints.CartItems.Models;
-using test.Endpoints.Carts.Models;
-using test.Models;
+using test.CQRS.CartItems.Queries.GetById;
+using Test.Endpoints.CartItems.Requests;
+using Test.Services.CartItemsService;
 
-namespace test.Endpoints;
+namespace Test.Endpoints.CartItems;
 
 public sealed class CartItemEndPoints : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var cartItem = app.MapGroup("api/carts");
+        var cartItem = app.MapGroup("api/carts")
+            .RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
 
-        cartItem.MapPost("/", AddProduct);
-        //cartItem.MapDelete("/", RemoveProductAsync);
+        cartItem.MapPost("/", AddProductInCartItem);
+        cartItem.MapPut("/", UpdateQuantity);
+        cartItem.MapDelete("/", RemoveCartItem);
+        cartItem.MapGet("/{id}", GetCartItem);
         //cartItem.MapGet("/{cartId}", FindProductAsync);
         //cartItem.MapGet("/", GetProductAsync);
     }
 
-    public async Task<IResult> AddProduct(int cartId, [FromBody] CartItemRequest cartItemRequest, [FromServices] ICartRepository cartRepository, [FromServices] IProductRepository productRepository)
+    public async Task<IResult> GetCartItem(int id, ISender sender)
     {
-        var cart = await cartRepository.GetAsync(cartId);
-        if (cart == null)
+        var response = await sender.Send(new GetByIdCartItemQuery(id));
+
+        return response is null ? Results.BadRequest("not found") : Results.Ok(response);
+    }
+
+    public async Task<IResult> AddProductInCartItem([FromBody] AddCartItemRequest addCartItemRequest, [FromServices] ICartItemsService cartItemsService)
+    {
+        var result = await cartItemsService.AddProduct(addCartItemRequest);
+
+        if (!result)
         {
-            return Results.NotFound(new { Message = "Cart not found" });
+            return Results.Ok(new { Message = "cant added" });
         }
 
-        var product = await productRepository.GetAsync(cartItemRequest.ProductId);
-        if (product == null)
+        return Results.Ok(result);
+    }
+
+
+    public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest updateCartItemRequest, [FromServices] ICartItemsService cartItemsService)
+    {
+        var result = await cartItemsService.UpdateQuantityProduct(updateCartItemRequest);
+
+        if (result is null)
         {
-            return Results.NotFound(new { Message = "Product not found" });
+            return Results.NotFound(new { Message = "Product not found or invalid request" });
         }
 
-        cart.Products ??= [];
+        return Results.Ok(result);
+    }
 
-        var cartItem = new CartItem
+    public async Task<IResult> RemoveCartItem([FromBody] RemoveCartItemRequest removeCartItemRequest, [FromServices] ICartItemsService cartItemsService)
+    {
+        var result = await cartItemsService.DecreaseProductQuantity(removeCartItemRequest);
+
+        if (result is null)
         {
-            CartId = cartId,
-            ProductId = cartItemRequest.ProductId,
-            Quantity = cartItemRequest.Quantity,
-            Product = product
-        };
+            return Results.NotFound(new { Message = "Product not found or invalid request" });
+        }
 
-        cart.Products.Add(cartItem);
-        cart.TotalSum += product.Price * cartItem.Quantity;
-
-        await cartRepository.UpdateAsync(cart);
-
-      
-        var cartResponse = new CartResponse
-        {
-            Id = cart.Id,
-            UserId = cart.UserId,
-            Items = cart.Products.Select(item => new CartItemResponse
-            {
-                Id = item.Id,
-                ProductId = item.ProductId,
-                ProductName = item.Product.Name,
-                Quantity = item.Quantity,
-                Price = item.Product.Price
-            }).ToList(),
-            TotalSum = cart.TotalSum
-        };
-
-        return Results.Ok(cartResponse);
+        return Results.Ok(result);
     }
 
 

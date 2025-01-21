@@ -1,18 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using test.Database.Repositories.Interfaces;
-using test.Models;
+using System.Text.Json;
+using Test.Cache;
+using Test.Database.Repositories.Interfaces;
+using Test.Models;
 
-namespace test.Database.Repositories.Classes;
+namespace Test.Database.Repositories.Classes;
 
-public class UserRepository(ApplicationDbContext dbContext, IDistributedCache cache) :
+public class UserRepository(ApplicationDbContext dbContext, ICacheEntityService cache) :
     BaseRepository<User>(dbContext, cache), IUserRepository
 {
-
-    public async Task<bool> UserExistsAsync(int userId)
+    public async Task<User> GetUserByEmailAsync(string email)
     {
-        return await _dbContext.Users
-            .AnyAsync(u => u.Id == userId);
-    }
+        var user = await 
+            _dbContext.Set<User>().Where(x => x.Email == email).FirstAsync();
 
+        await _cache.SetAsync(user);
+
+        return user;
+    }
 }
