@@ -7,7 +7,6 @@ namespace Test.Database.Repositories.Classes;
 
 public class CartItemRepository(ApplicationDbContext dbContext, ICacheEntityService cache) :
     BaseRepository<CartItem>(dbContext, cache), ICartItemRepository 
-
 {
     public async Task AddToCartAsync(int cartId, int productId, int quantity)
     {
@@ -19,16 +18,14 @@ public class CartItemRepository(ApplicationDbContext dbContext, ICacheEntityServ
             item.Quantity += quantity;
             return;
         }
-        else
+
+        var newCartItem = new CartItem
         {
-            var newCartItem = new CartItem
-            {
-                CartId = cartId,
-                ProductId = productId,
-                Quantity = quantity
-            };
-            await _dbContext.CartItems.AddAsync(newCartItem);
-        }
+            CartId = cartId,
+            ProductId = productId,
+            Quantity = quantity
+        };
+        await _dbContext.CartItems.AddAsync(newCartItem);
     }
 
     public async Task<CartItem> FindItemInCartAsync(int cartId, int productId)

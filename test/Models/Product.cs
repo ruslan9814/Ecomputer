@@ -1,4 +1,5 @@
-﻿using Test.Models.Core;
+﻿using test.Common;
+using Test.Models.Core;
 
 namespace Test.Models;
 
@@ -26,6 +27,17 @@ public class Product : EntityBase
         IsInStock = isInStock;
         Description = description;
         CreatedDate = createdDate;
+    }
+
+    public Result Update(string name, decimal price, int quantity, bool isInStock, string? description)
+    {
+
+        Name = name;
+        Price = price;
+        Quantity = quantity;
+        IsInStock = isInStock;
+        Description = description;
+        return Result.Success;
     }
 }
 

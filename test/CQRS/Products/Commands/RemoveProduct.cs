@@ -16,12 +16,14 @@ namespace test.CQRS.Products.Commands
 
         public async Task<Result> Handle(DeleteProduct request, CancellationToken cancellationToken)
         {
-            var product = await _productRepository.GetAsync(request.ProductId);
+            var productIsExist = await _productRepository.IsExistAsync(request.ProductId);
 
-            if (product is null)
+            if (!productIsExist)
             {
                 return Result.Failure("Продукт не найден.");
             }
+
+            var product = await _productRepository.GetAsync(request.ProductId);
 
             await _productRepository.DeleteAsync(request.ProductId);
             await _unitOfWork.Commit();

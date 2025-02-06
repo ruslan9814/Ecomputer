@@ -25,7 +25,6 @@ public sealed class UpdateQuantityCartItemHandler(
         var cartItem = await _cartItemRepository.GetAsync(request.Id);
 
         cartItem.UpdateQuantity(request.Quantity);
-
         await _cartItemRepository.UpdateAsync(cartItem);
         await _unitOfWork.Commit();
 

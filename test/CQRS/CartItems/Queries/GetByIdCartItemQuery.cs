@@ -16,12 +16,13 @@ public sealed record GetByIdCartItemQueryHandler(ICartItemRepository CartItemRep
 
         if (!isExist)
         {
-            return (Result<CartItemDto>)Result.Failure($"Элемент корзины с ID {request.Id} не найден.");
+            return Result<CartItemDto>
+                .Failure($"Элемент корзины с ID {request.Id} не найден.");
         }
 
         var cartItem = await _cartItemRepository.GetAsync(request.Id);
 
-        var cartItemDto = new CartItemDto(
+        var response = new CartItemDto(
             cartItem.Id,
             cartItem.Quantity,
             new ProductDto(
@@ -34,7 +35,7 @@ public sealed record GetByIdCartItemQueryHandler(ICartItemRepository CartItemRep
                 ));
 
 
-        return (Result<CartItemDto>)Result.Success;
+        return Result<CartItemDto>.Success(response);
     }
 }
 

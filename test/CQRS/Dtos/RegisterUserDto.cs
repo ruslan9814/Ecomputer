@@ -3,7 +3,7 @@
 public sealed record RegisterUserDto(
     string Email,      
     string Password,   
-    string Name,       
+    string Name,
     string Address    
 );
 
