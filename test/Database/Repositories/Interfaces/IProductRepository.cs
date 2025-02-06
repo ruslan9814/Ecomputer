@@ -8,4 +8,5 @@ public interface IProductRepository : IBaseRepository<Product>
     Task<bool> IsProductInStockAsync(int productId); 
     Task<int> GetProductStockCountAsync(int productId);
     Task<IEnumerable<Product>> GetProductsAsync(decimal minPrice, decimal maxPrice);
+    Task<IEnumerable<Product>> GetAllAsync();
 }

@@ -1,4 +1,4 @@
-﻿namespace Test.Endpoints.Users.Requests;
+﻿namespace test.Endpoints.Users.Requests;
 
 public sealed record RemoveUserRequest(int Id);
 

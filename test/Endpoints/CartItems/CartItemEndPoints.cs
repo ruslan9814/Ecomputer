@@ -1,7 +1,6 @@
 ﻿using Carter;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using test.CQRS.CartItems.Queries.GetById;
 using Test.Endpoints.CartItems.Requests;
 using Test.Services.CartItemsService;
 

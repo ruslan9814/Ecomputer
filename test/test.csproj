@@ -31,11 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Carts\Commands\" />
-    <Folder Include="CQRS\Carts\Queries\" />
-    <Folder Include="CQRS\Products\Commands\" />
-    <Folder Include="CQRS\Products\Queries\" />
-    <Folder Include="CQRS\Users\Commands\" />
     <Folder Include="CQRS\Users\Queries\" />
     <Folder Include="Services\Cart\Requests\" />
   </ItemGroup>

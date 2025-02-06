@@ -1,4 +1,4 @@
-﻿namespace Test.Endpoints.Products.Requests;
+﻿namespace test.Endpoints.Products.Requests;
 
 public sealed record UpdateProductRequest(
     int Id,

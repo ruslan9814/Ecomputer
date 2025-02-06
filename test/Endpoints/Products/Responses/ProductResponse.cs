@@ -1,4 +1,4 @@
-﻿namespace Test.Endpoints.Products.Responses;
+﻿namespace test.Endpoints.Products.Responses;
 
 public sealed record ProductResponse(
     int Id,

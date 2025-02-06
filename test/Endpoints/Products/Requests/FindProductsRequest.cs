@@ -1,4 +1,4 @@
-﻿namespace Test.Endpoints.Products.Requests;
+﻿namespace test.Endpoints.Products.Requests;
 
 // TODO: Change logic
 public sealed record FindProductsRequest(

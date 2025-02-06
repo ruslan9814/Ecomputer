@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Test.Services.UserService;
 using Test.Endpoints.Users.Requests;
 
-namespace Test.Endpoints.Users;
+namespace test.Endpoints.Users;
 
 public sealed class UserEndPoints : CarterModule
 {
@@ -32,9 +32,9 @@ public sealed class UserEndPoints : CarterModule
 
     [HttpPut("reqister")]
     private async Task<IResult> RegisterUser([FromBody] RegistUserRequest userRequest, [FromServices] IUserService userService)
-    {   
+    {
 
-        if (userRequest is { Username: not null})
+        if (userRequest is { Username: not null })
         {
             return Results.BadRequest(new { Message = "Invalid user request data." });
         }
@@ -46,7 +46,7 @@ public sealed class UserEndPoints : CarterModule
     [HttpPost("login")]
     private async Task<IResult> LoginUser([FromBody] LoginUserRequest loginRequest, [FromServices] IUserService userService)
     {
- 
+
         var user = await userService.LoginUser(loginRequest);
         if (user is null)
         {

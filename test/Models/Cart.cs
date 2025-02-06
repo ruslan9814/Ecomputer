@@ -1,11 +1,10 @@
 ﻿using Test.Models.Core;
-
-namespace Test.Models;
+using Test.Models;
 
 public class Cart : EntityBase
 {
     public decimal TotalSum { get; set; }
-    public ICollection<CartItem> Items { get; set; } = [];
+    public ICollection<CartItem> Items { get; set; } = new List<CartItem>();
     public int UserId { get; set; }
     public User User { get; set; }
 
@@ -17,9 +16,9 @@ public class Cart : EntityBase
 
     public Cart(int id, decimal totalSum, int userId, User user, ICollection<CartItem> products) : base(id)
     {
-        TotalSum = totalSum;
         UserId = userId;
         User = user;
         Items = products;
+        TotalSum = products.Sum(x => x.Product.Price * x.Quantity);
     }
 }

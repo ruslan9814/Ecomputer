@@ -1,4 +1,5 @@
-﻿using Test.Models.Core;
+﻿using test.CQRS.CartItems.Commands;
+using Test.Models.Core;
 
 namespace Test.Models;
 
@@ -23,5 +24,11 @@ public class CartItem : EntityBase
         Product = product;
         CartId = cartId;
         Cart = cart;
+    }
+
+    public void UpdateQuantity(int quantity)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(quantity);
+        Quantity = quantity;
     }
 }

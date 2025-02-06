@@ -30,4 +30,9 @@ public class ProductRepository(ApplicationDbContext dbContext, ICacheEntityServi
 
         return quantity > 0;
     }
+
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return await _dbContext.Products.ToListAsync();
+    }
 }

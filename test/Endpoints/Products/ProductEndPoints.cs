@@ -1,9 +1,9 @@
 ﻿using Carter;
 using Microsoft.AspNetCore.Mvc;
-using Test.Endpoints.Products.Requests;
+using test.Endpoints.Products.Requests;
 using Test.Services.Product;
 
-namespace Test.Endpoints.Products;
+namespace test.Endpoints.Products;
 
 ////realizovat repositoriy cart and cartItem METODI DLA KORZINI ADD DELETE UPDATE NAPISAT V CLASSE cartItemRepository,
 //// TAKJE DOVAVIT cartItemEndPoints i v ney vizvat metodi cerez ICartItemRepository
