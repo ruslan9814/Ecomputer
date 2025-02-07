@@ -1,6 +1,5 @@
 ﻿using Carter;
 using Microsoft.AspNetCore.Mvc;
-using Test.Services.UserService;
 using Test.Endpoints.Users.Requests;
 
 namespace test.Endpoints.Users;
@@ -11,73 +10,53 @@ public sealed class UserEndPoints : CarterModule
     {
         var user = app.MapGroup("api/users");
 
-        user.MapGet("/{UserId}", GetUsers);
+        user.MapGet("/{UserId}", GetUser);
         user.MapPost("/register", RegisterUser);
         user.MapPost("/login", LoginUser);
         user.MapPut("/{UserId}", UpdateUsers);
         user.MapDelete("/{UserId}", RemoveUsers);
     }
 
-    [HttpPost("getUser")]
-    private async Task<IResult> GetUsers([FromBody] GetUserRequest getUserRequest, [FromServices] IUserService userService)
+    private async Task<IResult> GetUser([FromBody] GetUserRequest getUserRequest, [FromServices] ISender sender)
     {
-        var result = await userService.GetUser(getUserRequest);
-        if (result is null)
-        {
-            return Results.NotFound(new { Message = "User not found" });
-        }
-
-        return Results.Ok(result);
+        var response = await sender.Send(new GetUserById(getUserRequest.Id));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
     }
 
-    [HttpPut("reqister")]
-    private async Task<IResult> RegisterUser([FromBody] RegistUserRequest userRequest, [FromServices] IUserService userService)
+    private async Task<IResult> RegisterUser([FromBody] RegistUserRequest userRequest, [FromServices] ISender sender)
     {
 
-        if (userRequest is { Username: not null })
-        {
-            return Results.BadRequest(new { Message = "Invalid user request data." });
-        }
-
-        var userId = await userService.AddUser(userRequest);
-        return Results.Created($"/api/users/{userId}", new { UserId = userId });
+       var response = await sender.Send(new AddUser(userRequest));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
     }
 
-    [HttpPost("login")]
-    private async Task<IResult> LoginUser([FromBody] LoginUserRequest loginRequest, [FromServices] IUserService userService)
+    private async Task<IResult> LoginUser([FromBody] LoginUserRequest loginRequest, [FromServices] ISender sender)
     {
 
-        var user = await userService.LoginUser(loginRequest);
-        if (user is null)
-        {
-            return Results.Unauthorized();
-        }
-
-        return Results.Ok(new { Message = "Login successful", UserId = user.Id });
+       var response = await sender.Send(new LoginUser(loginRequest));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
     }
 
-    [HttpPut("update")]
-    private async Task<IResult> UpdateUsers([FromBody] UpdateUserRequest updateUserRequest, [FromServices] IUserService userService)
+    private async Task<IResult> UpdateUsers([FromBody] UpdateUserRequest updateUserRequest, [FromServices] ISender sender)
     {
 
-        var updated = await userService.UpdateUser(updateUserRequest);
-        if (!updated)
-        {
-            return Results.NotFound(new { Message = "User not found" });
-        }
-
-        return Results.Ok(new { Message = "User updated successfully" });
+        var response = await sender.Send(new UpdateUser(updateUserRequest));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
     }
 
-    [HttpDelete("remove")]
-    private async Task<IResult> RemoveUsers([FromBody] RemoveUserRequest removeUserRequest, [FromServices] IUserService userService)
+    private async Task<IResult> RemoveUsers([FromBody] RemoveUserRequest removeUserRequest, [FromServices] ISender sender)
     {
-        var removed = await userService.DeleteUser(removeUserRequest);
-        if (!removed)
-        {
-            return Results.NotFound(new { Message = "User not found" });
-        }
-
-        return Results.Ok(new { Message = "User removed successfully" });
+        var response = await sender.Send(new RemoveUser(removeUserRequest.Id));
+        return response.IsFailure ? 
+            Results.BadRequest(response.Error) 
+            : Results.Ok(response);
     }
 }

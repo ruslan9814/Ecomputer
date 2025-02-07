@@ -3,6 +3,7 @@
 public sealed record UpdateProductRequest(
     int Id,
     string? Name,
-    decimal? Price,
+    decimal Price,
     string? Description,
-    int? Quantity);
+    int Quantity,
+    bool IsInStock);

@@ -5,4 +5,5 @@ public sealed record AddProductRequest(
     string Name,
     decimal Price,
     string? Description,
-    int Quantity);
+    int Quantity,
+    bool IsInStock);

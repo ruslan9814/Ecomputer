@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using test.Endpoints.Products.Requests;
 using Test.Services.Product;
+using test.CQRS.Products.Commands;
+using test.CQRS.Products.Queries;
 
 namespace test.Endpoints.Products;
 
@@ -19,35 +21,38 @@ public sealed class ProductEndPoints : CarterModule
         product.MapPut("{productId}/", UpdateProduct);
     }
 
-    public async Task<IResult> GetProduct([FromBody] GetProductRequest request, [FromServices] IProductService productService)
+    public async Task<IResult> GetProduct([FromBody] GetProductRequest request, [FromServices] ISender sender)
     {
-        var product = await productService.GetProductAsync(request);
-        return product is null
-            ? Results.NotFound(new { Message = "Product not found" })
-            : Results.Ok(product);
+        var response = await sender.Send(new GetProductById(request.Id));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
     }
 
-    private async Task<IResult> AddProduct([FromBody] AddProductRequest request, [FromServices] IProductService productService)
+    private async Task<IResult> AddProduct([FromBody] AddProductRequest request, [FromServices] ISender sender)
     {
-        var product = await productService.AddProductAsync(request);
-        return product is null
-            ? Results.BadRequest(new { Message = "Invalid product data" })
-            : Results.Created($"/api/products/{product.Id}", product);
+        var response = await sender.Send(new AddProduct(request.Name, 
+            request.Description, request.Price, request.IsInStock));
+
+        return response.IsFailure ?
+            Results.BadRequest(response.Error) 
+            : Results.Ok(response);
     }
 
-    public async Task<IResult> RemoveProduct([FromBody] RemoveProductRequest request, [FromServices] IProductService productService)
+    public async Task<IResult> RemoveProduct([FromBody] RemoveProductRequest request, [FromServices] ISender sender)
     {
-        var success = await productService.RemoveProductAsync(request);
-        return success
-            ? Results.Ok(new { Message = "Product removed successfully" })
-            : Results.NotFound(new { Message = "Product not found" });
+         var response = await sender.Send(new DeleteProduct(request.Id));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
     }
 
-    private async Task<IResult> UpdateProduct([FromBody] UpdateProductRequest request, [FromServices] IProductService productService)
+    private async Task<IResult> UpdateProduct([FromBody] UpdateProductRequest request, [FromServices] ISender sender)
     {
-        var product = await productService.UpdateProductAsync(request);
-        return product is null
-            ? Results.NotFound(new { Message = "Product not found or invalid request" })
-            : Results.Ok(product);
+       var response = await sender.Send(new UpdateProduct(request.Id, request.Name,
+            request.Description, request.Price, request.Quantity, request.IsInStock));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
     }
 }

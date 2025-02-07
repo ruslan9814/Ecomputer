@@ -1,5 +1,6 @@
 ﻿using Carter;
 using Microsoft.AspNetCore.Mvc;
+using test.CQRS.Carts.Queries;
 using Test.Services.Cart;
 
 namespace Test.Endpoints.Carts;
@@ -13,11 +14,11 @@ public sealed class CartEndpoints : CarterModule
         cart.MapGet("{cartId}", GetCart);
     }
 
-    private static async Task<IResult> GetCart([FromRoute] int cartId, [FromServices] CartService cartService)
+    private static async Task<IResult> GetCart(int cartId, [FromServices] ISender sender)
     {
-        var cart = await cartService.GetCart(cartId);
-        return cart is null ? Results.NotFound(new { Message = "Cart not found" }) 
-            : Results.Ok(cart);
+        var response = await sender.Send(new GetByUserIdCart(cartId));
+
+        return response.IsFailure ? Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
 }

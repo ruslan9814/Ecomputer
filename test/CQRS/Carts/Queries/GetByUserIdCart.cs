@@ -24,18 +24,18 @@ public sealed class GetByUserIdCartHandler(ICartRepository cartRepository)
 
         ICollection<CartItemDto> cartItemDtos = [];
 
-        foreach (var cartItem_ in cart.Items)
+        foreach (var cartItem in cart.Items)
         {
             var cartItemDto = new CartItemDto(
-                cartItem_.Id,  
-                cartItem_.Quantity,  
+                cartItem.Id,  
+                cartItem.Quantity,  
                 new ProductDto(   
-                    cartItem_.ProductId,              
-                    cartItem_.Product.Name,           
-                    cartItem_.Product.Description,    
-                    cartItem_.Product.Price,        
-                    cartItem_.Product.IsInStock,      
-                    cartItem_.Product.CreatedDate   
+                    cartItem.ProductId,              
+                    cartItem.Product.Name,           
+                    cartItem.Product.Description,    
+                    cartItem.Product.Price,        
+                    cartItem.Product.IsInStock,      
+                    cartItem.Product.CreatedDate   
                 )
             );
 
@@ -47,7 +47,6 @@ public sealed class GetByUserIdCartHandler(ICartRepository cartRepository)
         var cartDto = new CartDto(
             request.UserId,           
             cart.Items.Count,         
-            cart.TotalPrice,          
             cartItemDtos             
         );
 

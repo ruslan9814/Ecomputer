@@ -1,8 +1,9 @@
 ﻿using Carter;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using test.CQRS.CartItems.Commands;
+using test.CQRS.CartItems.Queries;
 using Test.Endpoints.CartItems.Requests;
-using Test.Services.CartItemsService;
+
 
 namespace Test.Endpoints.CartItems;
 
@@ -25,46 +26,34 @@ public sealed class CartItemEndPoints : CarterModule
     {
         var response = await sender.Send(new GetByIdCartItemQuery(id));
 
-        return response is null ? Results.BadRequest("not found") : Results.Ok(response);
+        return response.IsFailure ? 
+            Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
-    public async Task<IResult> AddProductInCartItem([FromBody] AddCartItemRequest addCartItemRequest, [FromServices] ICartItemsService cartItemsService)
+    public async Task<IResult> AddProductInCartItem([FromBody] AddCartItemRequest  addCartItemRequest, [FromServices] ISender sender)
     {
-        var result = await cartItemsService.AddProduct(addCartItemRequest);
+        var response = await sender.Send(new AddCartItem(addCartItemRequest.CartId, 
+            addCartItemRequest.ProductId, addCartItemRequest.Quantity));
 
-        if (!result)
-        {
-            return Results.Ok(new { Message = "cant added" });
-        }
-
-        return Results.Ok(result);
+        return response.IsFailure ?
+            Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
 
-    public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest updateCartItemRequest, [FromServices] ICartItemsService cartItemsService)
+
+    public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest updateCartItemRequest, [FromServices] ISender sender)
     {
-        var result = await cartItemsService.UpdateQuantityProduct(updateCartItemRequest);
+        var response = await sender.Send(new UpdateQuantityCartItem(updateCartItemRequest.Id, updateCartItemRequest.Quantity));
 
-        if (result is null)
-        {
-            return Results.NotFound(new { Message = "Product not found or invalid request" });
-        }
-
-        return Results.Ok(result);
+        return response.IsFailure ?
+            Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
-    public async Task<IResult> RemoveCartItem([FromBody] RemoveCartItemRequest removeCartItemRequest, [FromServices] ICartItemsService cartItemsService)
+    public async Task<IResult> RemoveCartItem([FromBody] RemoveCartItemRequest removeCartItemRequest, [FromServices] ISender sender)
     {
-        var result = await cartItemsService.DecreaseProductQuantity(removeCartItemRequest);
+        var response = await sender.Send(new RemoveCartItem(removeCartItemRequest.CartItemId));
 
-        if (result is null)
-        {
-            return Results.NotFound(new { Message = "Product not found or invalid request" });
-        }
-
-        return Results.Ok(result);
+        return response.IsFailure ?
+             Results.BadRequest(response.Error) : Results.Ok(response);
     }
-
-
-
 }

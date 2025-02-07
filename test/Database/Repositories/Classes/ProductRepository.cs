@@ -35,4 +35,27 @@ public class ProductRepository(ApplicationDbContext dbContext, ICacheEntityServi
     {
         return await _dbContext.Products.ToListAsync();
     }
+
+    public async Task<int> GetFilteredProductsCountAsync(
+        int id,
+        string? name,
+        decimal? minPrice,
+        decimal? maxPrice,
+        string? description,
+        int? quantity,
+        bool? isInStock)
+    {
+        var query = _dbContext.Products.AsQueryable();
+
+        if (id > 0) query = query.Where(p => p.Id == id);
+        if (!string.IsNullOrEmpty(name)) query = query.Where(p => p.Name.Contains(name));
+        if (minPrice.HasValue) query = query.Where(p => p.Price >= minPrice);
+        if (maxPrice.HasValue) query = query.Where(p => p.Price <= maxPrice);
+        if (!string.IsNullOrEmpty(description)) query = query.Where(p => p.Description.Contains(description));
+        if (quantity.HasValue) query = query.Where(p => p.Quantity == quantity);
+        if (isInStock.HasValue) query = query.Where(p => p.IsInStock == isInStock);
+
+        return await query.CountAsync();
+    }
+
 }

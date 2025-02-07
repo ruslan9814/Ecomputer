@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using test.Common;
-using test.CQRS.Dtos;
+﻿using test.Common;
 using test.Database.DbService;
 using Test.Database.Repositories.Interfaces;
 using Test.Models;
@@ -16,19 +14,23 @@ public sealed class RegisterUserHandler(IUserRepository userRepository, IPasswor
 
     public async Task<Result> Handle(RegisterUser request, CancellationToken cancellationToken)
     {
-        var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
+        var userIsExist = await _userRepository.IsEmailExistAsync(request.Email);
 
-        if (existingUser is not null)
+        if (userIsExist)
         {
             return Result.Failure("Пользователь с таким email уже существует.");
         }
 
-        _passwordHasher.HashPassword(request.Password);
+        var user = new User
+        {
+            Name = request.Name,
+            Email = request.Email,
+            Address = request.Address,
+            HashedPassword = _passwordHasher.HashPassword(request.Password)
+        };
 
-        var newUser = new User(request.Name, request.Email, request.Password);
-
-        await userRepository.AddAsync(newUser);
-        await unitOfWork.Commit(); 
+        await _userRepository.AddAsync(user);
+        await _unitOfWork.Commit();
 
         return Result.Success;
     }
