@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Test.Cache;
 using Test.Database.Repositories.Interfaces;
 using Test.Models;
@@ -58,4 +57,8 @@ public class ProductRepository(ApplicationDbContext dbContext, ICacheEntityServi
         return await query.CountAsync();
     }
 
+    public Task<int> GetFilteredProductsCountAsync(int? id, string? name, decimal? minPrice, decimal? maxPrice, string? description, int? quantity, bool? isInStock)
+    {
+        throw new NotImplementedException();
+    }
 }

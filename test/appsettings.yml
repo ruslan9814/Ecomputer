@@ -1,14 +1,23 @@
 Logging:
-   LogLevel:
-       Default: Information
-       Microsoft: Warning
-       Microsoft.Hosting.Lifetime: Information
-
-AllowedHosts: "*"
+  LogLevel:
+    Default: Information
+    Microsoft: Warning
+    Microsoft.Hosting.Lifetime: Information
+AllowedHosts: '*'
 
 Jwt:
-    Audiences: ["", ""]
-    Key: e444dff1ba68a27e327484b63b7da2c32a32fc7a52a4a0587fcb10dbfdac1b44
-    RefreshTokenExpirationTimeMinutes: 4
-    TokenExpirationTimeMinutes: 4
-    Issuer: "Test"
+  Audiences:
+    - ''
+    - ''
+  Key: e444dff1ba68a27e327484b63b7da2c32a32fc7a52a4a0587fcb10dbfdac1b44
+  RefreshTokenExpirationTimeMinutes: 4
+  TokenExpirationTimeMinutes: 4
+  Issuer: Test
+
+#TODO : Implement IMAP
+EmailSettings:
+  SmtpServer: smtp.gmail.com
+  SmtpPort: 587
+  EnableSsl: true
+  SmtpUser: nazarovruslan04@gmail.com
+  SmtpPassword: ra66mi66n665505857

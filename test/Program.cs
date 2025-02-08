@@ -2,8 +2,6 @@ using Carter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Test.Database.Repositories.Classes;
-using Test.Database.Repositories.Interfaces;
 using Test.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Test.Infrastrcture.Jwt;
@@ -11,11 +9,16 @@ using Test.Middleware;
 using Test;
 using Test.Models;
 using Test.Extensions;
+using test.Infrastrcture.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.Configure<EmailSettingsService>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailSenderService ,EmailSenderService>();
+
 //TODO
-builder.Services.AddMediatR(x => x.RegisterServicesFromAssembly());
+builder.Services.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Configuration.AddYamlFile("appsettings.yml", optional: true, reloadOnChange: true);
 
@@ -26,11 +29,6 @@ builder.Services.AddStackExchangeRedisCache(x =>
     x.Configuration = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"));
 
 builder.Services.AddOptions<JwtOptions>("Jwt");
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 
 builder.Services.AddControllers(options =>
 {
@@ -75,6 +73,7 @@ builder.Services.AddAuthorization(x =>
 builder.Services.AddCarter();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
+
 
 var app = builder.Build();
 

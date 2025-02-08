@@ -11,13 +11,13 @@ public sealed class CartItemEndPoints : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var cartItem = app.MapGroup("api/carts")
+        var cartItem = app.MapGroup("api/cart-item")
             .RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
 
         cartItem.MapPost("/", AddProductInCartItem);
         cartItem.MapPut("/", UpdateQuantity);
         cartItem.MapDelete("/", RemoveCartItem);
-        cartItem.MapGet("/{id}", GetCartItem);
+        cartItem.MapGet("/{Id}", GetCartItem);
         //cartItem.MapGet("/{cartId}", FindProductAsync);
         //cartItem.MapGet("/", GetProductAsync);
     }
@@ -30,10 +30,10 @@ public sealed class CartItemEndPoints : CarterModule
             Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
-    public async Task<IResult> AddProductInCartItem([FromBody] AddCartItemRequest  addCartItemRequest, [FromServices] ISender sender)
+    public async Task<IResult> AddProductInCartItem([FromBody] AddCartItemRequest request, ISender sender)
     {
-        var response = await sender.Send(new AddCartItem(addCartItemRequest.CartId, 
-            addCartItemRequest.ProductId, addCartItemRequest.Quantity));
+        var response = await sender.Send(new AddCartItemCommand(request.CartId,
+            request.ProductId, request.Quantity));
 
         return response.IsFailure ?
             Results.BadRequest(response.Error) : Results.Ok(response);
@@ -41,17 +41,17 @@ public sealed class CartItemEndPoints : CarterModule
 
 
 
-    public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest updateCartItemRequest, [FromServices] ISender sender)
+    public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest request, ISender sender)
     {
-        var response = await sender.Send(new UpdateQuantityCartItem(updateCartItemRequest.Id, updateCartItemRequest.Quantity));
+        var response = await sender.Send(new UpdateQuantityCartItemCommand(request.Id, request.Quantity));
 
         return response.IsFailure ?
             Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
-    public async Task<IResult> RemoveCartItem([FromBody] RemoveCartItemRequest removeCartItemRequest, [FromServices] ISender sender)
+    public async Task<IResult> RemoveCartItem([FromBody] RemoveCartItemRequest request, ISender sender)
     {
-        var response = await sender.Send(new RemoveCartItem(removeCartItemRequest.CartItemId));
+        var response = await sender.Send(new RemoveCartItemCommand(request.CartItemId));
 
         return response.IsFailure ?
              Results.BadRequest(response.Error) : Results.Ok(response);

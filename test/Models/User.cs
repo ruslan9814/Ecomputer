@@ -1,4 +1,7 @@
-﻿using Test.Models.Core;
+﻿using Microsoft.EntityFrameworkCore;
+using test.Common;
+using Test.Infrastrcture.Jwt;
+using Test.Models.Core;
 
 namespace Test.Models;
 
@@ -35,5 +38,15 @@ public class User : EntityBase
         Name = name;
         Email = email;
         HashedPassword = hashedPassword;
+    }
+
+    public  Result Login(bool isVerify)
+    {
+        if (!isVerify)
+        {
+            return Result.Failure("Пользователь с таким email не найден.");
+        }
+
+        return Result.Success;
     }
 }

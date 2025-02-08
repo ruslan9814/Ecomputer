@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
+using test.Common;
 using Test.Cache;
 using Test.Database.Repositories.Interfaces;
+using Test.Infrastrcture.Jwt;
 using Test.Models;
 
 namespace Test.Database.Repositories.Classes;
@@ -18,5 +20,10 @@ public class UserRepository(ApplicationDbContext dbContext, ICacheEntityService 
         await _cache.SetAsync(user);
 
         return user;
+    }
+
+    public async Task<bool> IsEmailExistAsync(string email)
+    {
+        return await _dbContext.Set<User>().AnyAsync(x => x.Email == email);
     }
 }

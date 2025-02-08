@@ -1,4 +1,4 @@
 ﻿namespace test.Endpoints.Users.Requests;
 
-public sealed record UpdateUserRequest(int Id, string Username, string Email, string NewPassword);
+public sealed record UpdateUserRequest(string Name, string Address, string PhoneNumber);
 

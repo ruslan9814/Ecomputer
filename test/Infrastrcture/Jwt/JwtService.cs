@@ -37,8 +37,9 @@ public class JwtService
     {
         return
         [
-            new Claim(JwtRegisteredClaimNames.Sub, username), 
+            new Claim(JwtRegisteredClaimNames.Sub, username),
             new Claim(ClaimTypes.Role, role),
         ];
     }
 }
+

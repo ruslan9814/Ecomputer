@@ -1,6 +1,7 @@
 ﻿using Carter;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Test.Endpoints.Users.Requests;
+using test.Endpoints.Users.Requests;
 
 namespace test.Endpoints.Users;
 
@@ -17,44 +18,48 @@ public sealed class UserEndPoints : CarterModule
         user.MapDelete("/{UserId}", RemoveUsers);
     }
 
-    private async Task<IResult> GetUser([FromBody] GetUserRequest getUserRequest, [FromServices] ISender sender)
+    private async Task<IResult> GetUser(int id, ISender sender)
     {
-        var response = await sender.Send(new GetUserById(getUserRequest.Id));
+        //var response = await sender.Send(new GetUserByIdCommand(id));
+        //return response.IsFailure
+        //    ? Results.BadRequest(response.Error)
+        //    : Results.Ok(response);
+
+        throw new NotImplementedException();
+    }
+
+    private async Task<IResult> RegisterUser([FromBody] RegisterUserRequest request, ISender sender)
+    {
+
+       var response = await sender.Send(new RegisterUserCommand(request.Email, request.Password, request.Username, request.Address));
         return response.IsFailure
             ? Results.BadRequest(response.Error)
             : Results.Ok(response);
     }
 
-    private async Task<IResult> RegisterUser([FromBody] RegistUserRequest userRequest, [FromServices] ISender sender)
+    private async Task<IResult> LoginUser([FromBody] LoginUserRequest request, ISender sender)
     {
 
-       var response = await sender.Send(new AddUser(userRequest));
+       var response = await sender.Send(new LoginUserCommand(request.Email, request.Password));
         return response.IsFailure
             ? Results.BadRequest(response.Error)
             : Results.Ok(response);
     }
 
-    private async Task<IResult> LoginUser([FromBody] LoginUserRequest loginRequest, [FromServices] ISender sender)
+    private async Task<IResult> UpdateUsers([FromBody] UpdateUserRequest request, ISender sender)
     {
 
-       var response = await sender.Send(new LoginUser(loginRequest));
-        return response.IsFailure
-            ? Results.BadRequest(response.Error)
-            : Results.Ok(response);
+        //var response = await sender.Send(new UpdateProfileCommand(request.));
+        //return response.IsFailure
+        //    ? Results.BadRequest(response.Error)
+        //    : Results.Ok(response);
+
+        throw new NotImplementedException();
     }
 
-    private async Task<IResult> UpdateUsers([FromBody] UpdateUserRequest updateUserRequest, [FromServices] ISender sender)
+    private async Task<IResult> RemoveUsers([FromBody] DeleteUserRequest request, ISender sender)
     {
-
-        var response = await sender.Send(new UpdateUser(updateUserRequest));
-        return response.IsFailure
-            ? Results.BadRequest(response.Error)
-            : Results.Ok(response);
-    }
-
-    private async Task<IResult> RemoveUsers([FromBody] RemoveUserRequest removeUserRequest, [FromServices] ISender sender)
-    {
-        var response = await sender.Send(new RemoveUser(removeUserRequest.Id));
+        var response = await sender.Send(new DeleteUserByIdCommand(request.Id));
         return response.IsFailure ? 
             Results.BadRequest(response.Error) 
             : Results.Ok(response);
