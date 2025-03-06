@@ -24,10 +24,6 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\test\test.csproj" />
-  </ItemGroup>
-
 
 	<ItemGroup>
     <Using Include="Xunit" />
