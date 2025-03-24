@@ -1,12 +1,11 @@
-version: '3.4'
 
 services:
-  test:
-    container_name: test
-    image: test:latest
+  Api:
+    container_name: Api
+    image: api:latest
     build:
       context: .
-      dockerfile: test/Dockerfile
+      dockerfile: EComputer/Dockerfile
     depends_on:
       - redis
       - database

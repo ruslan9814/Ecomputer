@@ -4,7 +4,7 @@ using Application.CartItems.Queries;
 using Presentation.CartItems.Requests;
 using Microsoft.AspNetCore.Http;
 using MediatR;
-using Api;
+using EComputer;
 
 namespace Presentation.CartItems;
 
@@ -12,8 +12,8 @@ public sealed class CartItemEndPoints : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var cartItem = app.MapGroup("api/cart-item")
-            .RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
+        var cartItem = app.MapGroup("api/cart-item");
+            //.RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
 
         cartItem.MapPost("/", AddProductInCartItem);
         cartItem.MapPut("/", UpdateQuantity);
@@ -39,8 +39,6 @@ public sealed class CartItemEndPoints : CarterModule
         return response.IsFailure ?
             Results.BadRequest(response.Error) : Results.Ok(response);
     }
-
-
 
     public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest request, ISender sender)
     {

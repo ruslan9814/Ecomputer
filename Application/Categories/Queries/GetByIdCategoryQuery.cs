@@ -5,12 +5,13 @@ namespace Application.Categories.Queries;
 
 public sealed record GetByIdCategoryQuery(int Id) : IRequest<Result<CategoryDto>>;
 
-public sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRepository) : 
-    IRequestHandler<GetByIdCategoryQuery, Result<CategoryDto>>
+internal sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRepository) :
+     IRequestHandler<GetByIdCategoryQuery, Result<CategoryDto>>
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
 
-    public async Task<Result<CategoryDto>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CategoryDto>> Handle(GetByIdCategoryQuery request, 
+        CancellationToken cancellationToken)
     {
         var categoryIsExists = await _categoryRepository.IsExistAsync(request.Id);
         if (!categoryIsExists)
@@ -18,17 +19,33 @@ public sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRepo
             return Result.Failure<CategoryDto>("Категория не найдена.");
         }
 
-        var category = await _categoryRepository.GetAsync(request.Id);
+        var category = await _categoryRepository.GetAsync(request.Id, includeRelated: true);
 
         if (category is null)
         {
             return Result.Failure<CategoryDto>("Категория не найдена.");
         }
 
-        var response = new CategoryDto(category.Id, category.Name);
+        var productDtos = category.Products?
+            .Select(p => new ProductDto(
+                p.Id,
+                p.Name,
+                p.Description,
+                p.Price,
+                p.IsInStock,
+                p.CreatedDate,
+                p.CategoryId
+            ))
+            .ToList();
+
+        var response = new CategoryDto(
+            category.Id,
+            category.Name,
+            productDtos ?? []
+        );
 
         return Result.Success(response);
-
     }
 }
+
 

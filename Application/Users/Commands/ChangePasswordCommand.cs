@@ -9,7 +9,7 @@ public sealed record ChangePasswordCommand(
     string NewPassword) : IRequest<Result>;
 
 
-public sealed class ChangePasswordCommandHandler(
+internal sealed class ChangePasswordCommandHandler(
     IUserRepository userRepository, 
     IPasswordHasher passwordHasher, 
     IUnitOfWork unitOfWork) 
@@ -19,7 +19,8 @@ public sealed class ChangePasswordCommandHandler(
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ChangePasswordCommand request, 
+        CancellationToken cancellationToken)
     {
         var isExist = await _userRepository.IsExistAsync(request.UserId);
 
@@ -30,7 +31,8 @@ public sealed class ChangePasswordCommandHandler(
 
         var user = await _userRepository.GetAsync(request.UserId);
 
-        var verificationResult = _passwordHasher.VerifyPassword(user.HashedPassword, request.OldPassword);
+        var verificationResult = _passwordHasher.VerifyPassword(user.HashedPassword, 
+            request.OldPassword);
 
         if (!verificationResult)
         {
@@ -41,7 +43,7 @@ public sealed class ChangePasswordCommandHandler(
 
         user.HashedPassword = newHashedPassword;
 
-        await _userRepository.UpdateAsync(user);
+        await _userRepository.UpdateAsync(user, cancellationToken);
         await _unitOfWork.Commit();
         return Result.Success();
     }

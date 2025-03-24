@@ -8,9 +8,10 @@ AllowedHosts: '*'
 Jwt:
   Audience: TestAudience
   Key: e444dff1ba68a27e327484b63b7da2c32a32fc7a52a4a0587fcb10dbfdac1b44
-  RefreshTokenExpirationTimeMinutes: 4
-  TokenExpirationTimeMinutes: 4
+  RefreshTokenExpirationTimeMinutes: 1440
+  TokenExpirationTimeMinutes: 5
   Issuer: Test
+  RefreshTokenTTLDays: 7
 
 #TODO : Implement IMAP
 EmailSettings:
@@ -19,3 +20,7 @@ EmailSettings:
   EnableSsl: true
   Email: nazarovruslan04@gmail.com
   Password: zanb axss upsa gvrk
+
+
+Cache: 
+  DefaultDurationMinutes: 5

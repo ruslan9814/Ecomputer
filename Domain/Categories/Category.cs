@@ -1,19 +1,19 @@
-﻿namespace Domain.Categories;
+﻿using Domain.Products;
+using System.Text.Json.Serialization;
+
+namespace Domain.Categories;
 
 public class Category : EntityBase
 {
     public string Name { get; set; } = null!;
+    public ICollection<Product> Products { get; set; } = [];
 
     private Category()
     {
     }
 
-    public Category(int id, string name) : base(id)
-    {
-        Name = name;
-    }
-
-    public Category(string name)
+    [JsonConstructor]
+    public Category(string name) : base(0)
     {
         Name = name;
     }

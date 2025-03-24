@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Infrasctructure.Jwt;
@@ -12,10 +13,10 @@ public class JwtService(IOptions<JwtOptions> options, IDistributedCache database
     private readonly JwtOptions _options = options.Value;
     private readonly IDistributedCache _redisDatabase = database;
 
-    public async Task<string> GetToken(string username, string role, string email)
+    public async Task<string> GetToken(int userId, string username, string role, string email)
     {
 
-        var claims = CreateClaims(username, role, email);
+        var claims = CreateClaims(userId, username, role, email);
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
@@ -35,23 +36,44 @@ public class JwtService(IOptions<JwtOptions> options, IDistributedCache database
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_options.TokenExpirationTimeMinutes)
         };
 
-        await _redisDatabase.SetStringAsync(username, tokenValue, options);
+        await _redisDatabase.SetStringAsync($"access_token:{userId}", tokenValue, options);
 
         return tokenValue;
     }
 
-    private static Claim[] CreateClaims(string username, string role, string email) =>
+    private static Claim[] CreateClaims(int userId, string username, string role, string email) =>
         [
-            new Claim(JwtRegisteredClaimNames.Sub, username),
-            new Claim(ClaimTypes.Role, role),
-            new Claim(ClaimTypes.Email, email)
+        new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+        new Claim(JwtRegisteredClaimNames.UniqueName, username),
+        new Claim(JwtRegisteredClaimNames.Email, email),
+        new Claim(ClaimTypes.Role, role),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         ];
 
-    public string GetRefreshToken()
+    public string GenerateRefreshToken()
     {
-        var random = Guid.NewGuid().ToByteArray();
+        var randomBytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+            var token = Convert.ToBase64String(randomBytes)
+       .Replace('+', '-') 
+       .Replace('/', '_')
+       .TrimEnd('=');
 
-        return Convert.ToBase64String(random);
+        return token;
     }
+
+    public int GetUserIdFromToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+        var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+        return userId is null ? 
+            throw new Exception() 
+            : int.Parse(userId);
+    }
+
 }
 

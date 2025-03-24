@@ -2,7 +2,8 @@
 {
     public interface IJwtService
     {
-        Task<string> GetToken(string username, string role, string email);
-        string GetRefreshToken();
+        Task<string> GetToken(int id, string username, string role, string email);
+        string GenerateRefreshToken();
+        int GetUserIdFromToken(string token);
     }
 }

@@ -6,7 +6,7 @@ namespace Application.Carts.Commands;
 
 public sealed record ClearCartCommand(int Id) : IRequest<Result>;
 
-public sealed class ClearCartCommandHandler(
+internal sealed class ClearCartCommandHandler(
     ICartRepository cartRepository, IUnitOfWork unitOfWork) 
     : IRequestHandler<ClearCartCommand, Result>
 {
@@ -15,19 +15,20 @@ public sealed class ClearCartCommandHandler(
 
     public async Task<Result> Handle(ClearCartCommand request, CancellationToken cancellationToken)
     {
-        var cartIsExist = await _cartRepository.IsExistAsync(request.Id);
+        var cart = await _cartRepository.GetWithItemsAsync(request.Id);
 
-        if (!cartIsExist)
+        if (cart is null)
         {
             return Result.Failure("Корзина не найдена.");
         }
 
-        var cart = await _cartRepository.GetAsync(request.Id);
-
-        cart.Items.Clear();
-        await _cartRepository.UpdateAsync(cart);
-        await _unitOfWork.Commit();
+        if (cart.Items.Count != 0)
+        {
+            await _cartRepository.RemoveItemsAsync(cart.Id);
+            await _unitOfWork.Commit();
+        }
 
         return Result.Success();
+
     }
 }

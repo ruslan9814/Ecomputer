@@ -7,5 +7,6 @@ public sealed record ProductDto(
     decimal Price,
     bool IsInStock,
     DateTime CreatedDate,
-    CategoryDto Category
+    int CategoryId
+    //CategoryDto Category
     );

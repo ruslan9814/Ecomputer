@@ -1,5 +1,6 @@
 ﻿using Domain.Carts;
-using Domain.Core;
+using Domain.Favorites;
+using Domain.Orders;
 
 namespace Domain.Users;
 
@@ -13,9 +14,11 @@ public class User : EntityBase
     public bool IsBlocked { get; set; }
     public string? ConfirmationToken { get; set; }
     public string RefreshToken { get; set; }
-    public DateTime RefreshTokenExpirationDate { get; set; }
     public Cart? Cart { get; set; }
     public Role Role { get; set; }
+    public ICollection<Order> Orders { get; set; } = [];
+    public ICollection<Favorite> Favorites { get; set; } = [];
+    public DateTime RefreshTokenExpiryTime { get; set; }
 
 
 #pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
@@ -30,8 +33,9 @@ public class User : EntityBase
         Address = address;
         IsEmailConfirmed = isEmailConfirmed;
         ConfirmationToken = confirmationToken;
-        RefreshToken = string.Empty;
+        RefreshToken = null!;
         Role = role;
+        Cart = new Cart(this);
     }
 
     public Result Login(bool isVerify)

@@ -6,14 +6,16 @@ namespace Application.Users.Commands;
 public sealed record ConfirmEmailCommand(string Token)
     : IRequest<Result>;
 
-public sealed record ConfirmEmailCommandHandler(
+internal sealed record ConfirmEmailCommandHandler(
     IUserRepository UserRepository,
     IUnitOfWork UnitOfWork)
     : IRequestHandler<ConfirmEmailCommand, Result>
 {
-    public async Task<Result> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ConfirmEmailCommand request, 
+        CancellationToken cancellationToken)
     {
-        var user = await UserRepository.GetUserByConfirmationTokenAsync(request.Token);
+        var user = await UserRepository.GetUserByConfirmationTokenAsync(request.Token, 
+            cancellationToken);
 
         if (user is null)
         {
@@ -27,7 +29,7 @@ public sealed record ConfirmEmailCommandHandler(
             return confirmEmailResult;
         }
 
-        await UserRepository.UpdateAsync(user);
+        await UserRepository.UpdateAsync(user, cancellationToken);
         await UnitOfWork.Commit();
 
         return Result.Success();

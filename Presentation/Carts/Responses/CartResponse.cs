@@ -1,10 +1,9 @@
-﻿
-using Presentation.CartItems.Responses;
+﻿using Presentation.CartItems.Responses;
 
-namespace Infrasctructure.Endpoints.Carts.Responses;
+namespace Presentation.Carts.Responses;
 
 public sealed record CartResponse(
-    int Id, 
+    int Id,
     int UserId,
     List<CartItemResponse> Items, decimal TotalSum);
 

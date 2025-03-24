@@ -14,21 +14,27 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasKey(product => product.Id);
 
         builder.Property(product => product.Name)
-               .IsRequired()  
+               .IsRequired()
                .HasMaxLength(200);
 
         builder.Property(product => product.Price)
-               .IsRequired();  
+               .IsRequired();
 
         builder.Property(product => product.Description)
-               .HasMaxLength(1024); 
+               .HasMaxLength(1024);
 
-        builder.HasMany<CartItem>()  
+        builder.HasMany<CartItem>()
                .WithOne(cartItem => cartItem.Product)
-               .HasForeignKey(cartItem => cartItem.ProductId) 
+               .HasForeignKey(cartItem => cartItem.ProductId)
                .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(product => product.CreatedDate)
-               .IsRequired();
+        .IsRequired();
+
+        builder.HasOne(p => p.Category)
+                         .WithMany(c => c.Products)  
+                         .HasForeignKey(p => p.CategoryId)
+                         .IsRequired()
+                         .OnDelete(DeleteBehavior.Restrict);
     }
 }

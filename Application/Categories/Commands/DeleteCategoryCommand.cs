@@ -5,13 +5,14 @@ namespace Application.Categories.Commands;
 
 public sealed record DeleteCategoryCommand(int Id) : IRequest<Result>;
 
-public sealed class DeleteCategoryCommandHandler(IUnitOfWork unitOfWork, ICategoryRepository categoryRepository) : 
-    IRequestHandler<DeleteCategoryCommand, Result>
+internal sealed class DeleteCategoryCommandHandler(IUnitOfWork unitOfWork, 
+    ICategoryRepository categoryRepository) : IRequestHandler<DeleteCategoryCommand, Result>
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteCategoryCommand request, 
+        CancellationToken cancellationToken)
     {
         var entityIsExists = await _categoryRepository.IsExistAsync(request.Id);
         if (!entityIsExists)

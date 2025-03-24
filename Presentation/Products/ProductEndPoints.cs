@@ -14,7 +14,8 @@ public sealed class ProductEndPoints : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var product = app.MapGroup("api/product").RequireAuthorization(policy => policy.RequireRole("Admin"));
+        var product = app.MapGroup("api/product");
+            //.RequireAuthorization(policy => policy.RequireRole("User"));
         product.MapGet("{productId}/", GetProduct);
         product.MapGet("/", GetFilterProducts);
         product.MapPost("/", AddProduct);

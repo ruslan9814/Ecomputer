@@ -2,6 +2,7 @@
 using Infrasctructure.Cache;
 using Infrasctructure.Database;
 using Infrasctructure.Repositories.Interfaces;
+using OpenQA.Selenium;
 
 namespace Infrasctructure.Repositories.Classes;
 
@@ -16,40 +17,44 @@ public abstract class BaseRepository<TEntity>(ApplicationDbContext dbContext, IC
     protected readonly ApplicationDbContext _dbContext = dbContext;
     protected readonly ICacheEntityService _cache = cache;
 
-    public async Task AddAsync(TEntity entity) =>
+    public async Task AddAsync(TEntity entity)
+    {
         await _dbContext.Set<TEntity>().AddAsync(entity);
+        await _cache.SetAsync(entity); 
+    }
 
     public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _dbContext.Set<TEntity>().FindAsync(id);
         if (entity is null)
-        {
             return false;
-        }
 
-        await _cache.DeleteAsync<TEntity>(entity.Id); /////////////////podumat
+        await _cache.DeleteAsync<TEntity>(id);
         _dbContext.Set<TEntity>().Remove(entity);
         return true;
     }
 
-
-    public async Task<TEntity> GetAsync(int id)
+    public async Task<TEntity> GetAsync(int id, bool includeRelated = false)
     {
-        var entity = await _cache.GetAsync<TEntity>(id);
+    
+        //var cachedEntity = await _cache.GetAsync<TEntity>(id);
+        //if (cachedEntity is not null)
+        //{
+        //    await _cache.RefreshAsync(cachedEntity);
+        //    return cachedEntity;
+        //}
 
-        if (entity is not null)
-        {
-            await _cache.RefreshAsync(entity);
-            return entity;
-        }
 
-        entity = await _dbContext.Set<TEntity>().FindAsync(id)
-            ?? throw new NullReferenceException();
+        var query = _dbContext.Set<TEntity>().AsQueryable();
+
+        if (includeRelated)
+            query = IncludeRelated(query);
+
+        var entity = await query.FirstOrDefaultAsync(e => e.Id == id)
+            ?? throw new NotFoundException(typeof(TEntity).Name);
 
         await _cache.SetAsync(entity);
-
         return entity;
-
     }
 
     public async Task UpdateAsync(TEntity entity)
@@ -59,6 +64,11 @@ public abstract class BaseRepository<TEntity>(ApplicationDbContext dbContext, IC
     }
 
     public async Task<bool> IsExistAsync(int id) =>
-        await _dbContext.Set<TEntity>().AnyAsync(u => u.Id == id);
+        await _dbContext.Set<TEntity>().AnyAsync(e => e.Id == id);
+
+    protected virtual IQueryable<TEntity> IncludeRelated(IQueryable<TEntity> query)
+    {
+        return query;
+    }
 
 }

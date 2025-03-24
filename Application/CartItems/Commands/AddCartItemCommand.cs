@@ -11,7 +11,7 @@ public sealed record AddCartItemCommand(
     ) : IRequest<Result>;
 
 
-public sealed class AddCartItemCommandHandler(
+internal sealed class AddCartItemCommandHandler(
     ICartRepository cartRepository,
     IProductRepository productRepository,
     ICartItemRepository cartItemRepository,
@@ -23,7 +23,8 @@ public sealed class AddCartItemCommandHandler(
     private readonly ICartItemRepository _cartItemRepository = cartItemRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(AddCartItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddCartItemCommand request, 
+        CancellationToken cancellationToken)
     {
         var isProductExist = await _productRepository.IsExistAsync(request.ProductId);
 

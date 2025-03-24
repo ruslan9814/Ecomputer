@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using MediatR;
 using Application.Carts.Queries;
 using Application.Carts.Commands;
-using Api;
+using EComputer;
 
 namespace Presentation.Carts;
 
@@ -11,7 +11,8 @@ public sealed class CartEndpoints : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var cart = app.MapGroup("api/cart").RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
+        var cart = app.MapGroup("api/cart");
+            //.RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
 
         cart.MapGet("{Id}", GetCart);
         cart.MapPost("/", ClearCart);

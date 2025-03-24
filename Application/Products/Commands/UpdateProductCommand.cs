@@ -13,7 +13,7 @@ public sealed record UpdateProductCommand(
     int CategoryId
 ) : IRequest<Result>;
 
-public sealed class UpdateProductCommandHandler(
+internal sealed class UpdateProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
     ICategoryRepository categoryRepository) : IRequestHandler<UpdateProductCommand, Result>
@@ -22,7 +22,8 @@ public sealed class UpdateProductCommandHandler(
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateProductCommand request, 
+        CancellationToken cancellationToken)
     {
 
         var productIsExist = await _productRepository.IsExistAsync(request.ProductId);

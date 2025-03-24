@@ -4,14 +4,15 @@ using Infrasctructure.UnitOfWork;
 namespace Application.Users.Commands;
 public sealed record DeleteUserByIdCommand(int Id) : IRequest<Result>;
 
-public sealed class DeleteUserByIdCommandHandler(
+internal sealed class DeleteUserByIdCommandHandler(
     IUserRepository userRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteUserByIdCommand, Result>
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(DeleteUserByIdCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteUserByIdCommand request, 
+        CancellationToken cancellationToken)
     {
         var userIsExist = await _userRepository.IsExistAsync(request.Id);
 

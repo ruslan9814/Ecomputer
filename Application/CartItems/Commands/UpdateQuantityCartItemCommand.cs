@@ -5,14 +5,15 @@ namespace Application.CartItems.Commands;
 
 public sealed record UpdateQuantityCartItemCommand(int Id, int Quantity) : IRequest<Result>;
 
-public sealed class UpdateQuantityCartItemCommandHandler(
+internal sealed class UpdateQuantityCartItemCommandHandler(
     ICartItemRepository cartItemRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateQuantityCartItemCommand, Result>
 {
     private readonly ICartItemRepository _cartItemRepository = cartItemRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(UpdateQuantityCartItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateQuantityCartItemCommand request, 
+        CancellationToken cancellationToken)
     {
         var isExist = await _cartItemRepository.IsExistAsync(request.Id);
 

@@ -1,53 +1,100 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using Infrasctructure.Cache;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace Infrasctructure.Cache;
-
-public class CacheEntityService(IDistributedCache cache) : ICacheEntityService
+public class CacheEntityService : ICacheEntityService
 {
+    private readonly IDistributedCache _cache;
+    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly TimeSpan _defaultCacheDuration;
 
-    private readonly IDistributedCache _cache = cache;
-    public async Task<TEntity> GetAsync<TEntity>(int id)
-        where TEntity : EntityBase
+    public CacheEntityService(IDistributedCache cache, IConfiguration configuration)
     {
-        var key = GetKey<TEntity>(id);
+        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
 
-        var cachedData = await _cache.GetStringAsync(key);
-
-        return JsonSerializer.Deserialize<TEntity>(cachedData!)!;
-    }
-
-
-    public async Task SetAsync<TEntity>(TEntity entity, TimeSpan? absoluteExpirationRelativeToNow = null) where
-        TEntity : EntityBase
-    {
-        var key = GetKey<TEntity>(entity.Id);
-
-        var options = new DistributedCacheEntryOptions
+        _jsonOptions = new JsonSerializerOptions
         {
-            AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow ?? TimeSpan.FromMinutes(5),
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = false,
+            ReferenceHandler = ReferenceHandler.Preserve
         };
 
-        var serializedEntity = JsonSerializer.Serialize(entity);
-
-        await _cache.SetStringAsync(key, serializedEntity, options);
+        _defaultCacheDuration = TimeSpan.FromMinutes(
+            configuration.GetValue<int>("Cache:DefaultDurationMinutes", 5));
     }
 
-    private static string GetKey<TEntity>(int id) =>
-        $"{typeof(TEntity)}-{id}";
-
-    // Обновление кэша (продлевает срок хранения)
-    public async Task RefreshAsync<TEntity>(TEntity entity)
+    public async Task<TEntity?> GetAsync<TEntity>(
+        int id,
+        CancellationToken cancellationToken = default)
         where TEntity : EntityBase
     {
+
+        var key = GetKey<TEntity>(id);
+        var cachedData = await _cache.GetStringAsync(key, cancellationToken);
+
+        if (string.IsNullOrEmpty(cachedData))
+        {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<TEntity>(cachedData, _jsonOptions);
+
+    }
+
+    public async Task SetAsync<TEntity>(
+        TEntity entity,
+        TimeSpan? absoluteExpirationRelativeToNow = null,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityBase
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+
+
         var key = GetKey<TEntity>(entity.Id);
-        await _cache.RefreshAsync(key);
+        var options = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow ?? _defaultCacheDuration,
+            SlidingExpiration = absoluteExpirationRelativeToNow == null ? TimeSpan.FromMinutes(2) : null
+        };
+
+        var serializedEntity = JsonSerializer.Serialize(entity, _jsonOptions);
+        await _cache.SetStringAsync(key, serializedEntity, options, cancellationToken);
+
     }
 
-    public async Task DeleteAsync<TEntity>(int id) 
+    public async Task RefreshAsync<TEntity>(
+        TEntity entity,
+        CancellationToken cancellationToken = default)
         where TEntity : EntityBase
     {
-       var key = GetKey<TEntity>(id);
-       await _cache.RemoveAsync(key);
+
+        var key = GetKey<TEntity>(entity.Id);
+        await _cache.RefreshAsync(key, cancellationToken);
+
+    }
+
+    public async Task DeleteAsync<TEntity>(
+        int id,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityBase
+    {
+
+        var key = GetKey<TEntity>(id);
+        await _cache.RemoveAsync(key, cancellationToken);
+
+    }
+
+    private static string GetKey<TEntity>(int id) where TEntity : EntityBase
+    {
+        return $"{typeof(TEntity).Name}-{id}";
+    }
+
+    public async Task<bool> ExistsAsync<TEntity>(int id, CancellationToken cancellationToken = default) where TEntity : EntityBase
+    {
+        var key = GetKey<TEntity>(id);
+        var cachedData = await _cache.GetStringAsync(key, cancellationToken);
+        return !string.IsNullOrEmpty(cachedData);
     }
 }

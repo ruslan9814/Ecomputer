@@ -5,51 +5,48 @@ namespace Application.Carts.Queries;
 
 public sealed record GetByUserIdCartQuery(int UserId) : IRequest<Result<CartDto>>;
 
-public sealed class GetByUserIdCartQueryHandler(ICartRepository cartRepository) 
+internal sealed class GetByUserIdCartQueryHandler(ICartRepository cartRepository) 
     : IRequestHandler<GetByUserIdCartQuery, Result<CartDto>>
 {
     private readonly ICartRepository _cartRepository = cartRepository;
-    public async Task<Result<CartDto>> Handle(GetByUserIdCartQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CartDto>> Handle(GetByUserIdCartQuery request, 
+        CancellationToken cancellationToken)
     {
-        var isCartExist = await _cartRepository.IsExistAsync(request.UserId);
+        var cart = await _cartRepository.GetByUserIdAsync(request.UserId);
 
-        if (!isCartExist)
+        if (cart is null)
         {
             return Result.Failure<CartDto>("Корзина не найдена.");
         }
 
-
-        var cart = await _cartRepository.GetAsync(request.UserId);
-
-        ICollection<CartItemDto> cartItemDtos = [];
+        var cartItemsDto = new List<CartItemDto>();
+        decimal totalPrice = 0;
 
         foreach (var cartItem in cart.Items)
         {
+            var product = cartItem.Product;
             var cartItemDto = new CartItemDto(
-                cartItem.Id,  
-                cartItem.Quantity,  
-                new ProductDto(   
-                    cartItem.ProductId,              
-                    cartItem.Product.Name,           
-                    cartItem.Product.Description,    
-                    cartItem.Product.Price,        
-                    cartItem.Product.IsInStock,      
-                    cartItem.Product.CreatedDate,
-                    new CategoryDto(
-                        cartItem.Product.Category.Id 
-                        ,cartItem.Product.Category.Name)
+                cartItem.Id,
+                cartItem.Quantity,
+                new ProductDto(
+                    product.Id,
+                    product.Name,
+                    product.Description,
+                    product.Price,
+                    product.IsInStock,
+                    product.CreatedDate,
+                    product.CategoryId
                 )
             );
 
-          
-            cartItemDtos.Add(cartItemDto);
+            cartItemsDto.Add(cartItemDto);
+            totalPrice += cartItem.Quantity * product.Price;
         }
 
-       
         var cartDto = new CartDto(
-            request.UserId,           
-            cart.Items.Count,         
-            cartItemDtos             
+            cart.UserId,
+            totalPrice,
+            cartItemsDto
         );
 
         return Result.Success(cartDto);

@@ -5,7 +5,7 @@ namespace Application.Products.Commands;
 
 public sealed record DeleteProductCommand(int ProductId) : IRequest<Result>;
 
-public sealed class DeleteProductCommandHandler(
+internal sealed class DeleteProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork
 ) : IRequestHandler<DeleteProductCommand, Result>
@@ -13,7 +13,8 @@ public sealed class DeleteProductCommandHandler(
     private readonly IProductRepository _productRepository = productRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteProductCommand request, 
+        CancellationToken cancellationToken)
     {
         var productIsExist = await _productRepository.IsExistAsync(request.ProductId);
 

@@ -5,11 +5,13 @@ namespace Application.Products.Queries;
 
 public sealed record GetProductByIdQuery(int Id) : IRequest<Result<ProductDto>>;
 
-public sealed class GetProductByIdQueryHandler(IProductRepository productRepository) : IRequestHandler<GetProductByIdQuery, Result<ProductDto>>
+internal sealed class GetProductByIdQueryHandler(IProductRepository productRepository) : 
+    IRequestHandler<GetProductByIdQuery, Result<ProductDto>>
 {
     private readonly IProductRepository _productRepository = productRepository;
 
-    public async Task<Result<ProductDto>> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ProductDto>> Handle(GetProductByIdQuery request, 
+        CancellationToken cancellationToken)
     {
         var productIsExist = await _productRepository.IsExistAsync(request.Id);
 
@@ -19,16 +21,16 @@ public sealed class GetProductByIdQueryHandler(IProductRepository productReposit
                 $"Продукт с ID {request.Id} не найден.");
         }
 
-        var product = await _productRepository.GetAsync(request.Id);
+        var product = await _productRepository.GetAsync(request.Id, includeRelated: true);
 
         var response = new ProductDto(
             product.Id,
             product.Name,
-            product.Description,
+            product.Description ?? string.Empty,
             product.Price,
             product.IsInStock,
             product.CreatedDate,
-            new CategoryDto(product.Category.Id, product.Category.Name)
+            product.CategoryId
         );
 
         return Result.Success(response);

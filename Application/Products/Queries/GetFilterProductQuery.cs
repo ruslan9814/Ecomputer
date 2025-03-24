@@ -13,11 +13,13 @@ public sealed record GetFilterProductQuery(
     int PageNumber = 1,
     int PageSize = 8) : IRequest<Result<ResultPage<ProductDto>>>;
 
-public sealed class GetFilterProductQueryHandler(IProductRepository productRepository) : IRequestHandler<GetFilterProductQuery, Result<ResultPage<ProductDto>>>
+internal sealed class GetFilterProductQueryHandler(IProductRepository productRepository) :
+    IRequestHandler<GetFilterProductQuery, Result<ResultPage<ProductDto>>>
 {
     private readonly IProductRepository _productRepository = productRepository;
 
-    public async Task<Result<ResultPage<ProductDto>>> Handle(GetFilterProductQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ResultPage<ProductDto>>> Handle(GetFilterProductQuery request, 
+        CancellationToken cancellationToken)
     {
         var products = await _productRepository.GetFilteredProductsAsync(
             request.Name,
@@ -41,7 +43,8 @@ public sealed class GetFilterProductQueryHandler(IProductRepository productRepos
             p.Price,
             p.IsInStock,
             p.CreatedDate,
-            new CategoryDto(p.Category.Id, p.Category.Name)
+            p.CategoryId
+        //new CategoryDto(p.Category.Id, p.Category.Name)
         )).ToList();
 
 

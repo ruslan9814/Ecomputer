@@ -4,7 +4,8 @@ using System.Net.Mail;
 
 namespace Infrastrcture.Email;
 
-public class EmailSenderService(IOptions<EmailSettingsService> emailSettings) : IEmailSenderService
+public class EmailSenderService(IOptions<EmailSettingsService> emailSettings) 
+    : IEmailSenderService
 {
     private readonly EmailSettingsService _emailSettings = emailSettings.Value;
 

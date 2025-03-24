@@ -9,7 +9,6 @@ namespace Presentation.Users;
 
 public sealed class UserEndPoints : CarterModule
 {
-    [HttpGet]
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
         var user = app.MapGroup("api/user");
@@ -20,6 +19,8 @@ public sealed class UserEndPoints : CarterModule
         user.MapPut("/{UserId}", UpdateUsers);
         user.MapDelete("/{UserId}", RemoveUsers);
         user.MapGet("/confirm-email/{token}", ConfirmEmail);
+        user.MapPost("/logout", Logout);
+        user.MapPost("/update-refresh-token", UpdateRefreshToken);
     }
 
     public async Task<IResult> ConfirmEmail(string token, string returnUrl, ISender sender)
@@ -37,6 +38,7 @@ public sealed class UserEndPoints : CarterModule
             ? Results.BadRequest(response.Error)
             : Results.Ok(response.Value);
     }
+
 
     public async Task<IResult> RegisterUser([FromBody] RegisterUserRequest request, ISender sender)
     {
@@ -74,4 +76,23 @@ public sealed class UserEndPoints : CarterModule
             Results.BadRequest(response.Error)
             : Results.Ok(response);
     }
+
+    public async Task<IResult> Logout(LogoutUserRequest logout, ISender sender)///////////////////
+    {
+        var response = await sender.Send(new LogoutUserCommand(logout.Token));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
+    }
+
+    public async Task<IResult> UpdateRefreshToken(UpdateRefreshTokenRequest request, ISender sender)
+    {
+        var response = await sender.Send(new UpdateRefreshTokenCommand(
+            request.Token, request.RefreshToken));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
+    }
+
+
 }

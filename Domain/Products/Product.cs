@@ -1,4 +1,6 @@
 ﻿using Domain.Categories;
+using Domain.Favorites;
+using System.Text.Json.Serialization;
 
 namespace Domain.Products;
 
@@ -9,6 +11,9 @@ public class Product : EntityBase
     public string Description { get; set; }
     public int Quantity { get; set; }
     public bool IsInStock { get; set; }
+    public int CategoryId { get; set; }
+
+    [JsonIgnore]
     public Category Category { get; set; }
     public DateTime CreatedDate { get; set; }
 
@@ -27,8 +32,10 @@ public class Product : EntityBase
         Description = description;
         CreatedDate = createdDate;
         Category = category;
+        CategoryId = category.Id;
     }
 
+    [JsonConstructor]
     public Product(string name, decimal price, int quantity, bool isInStock,
         DateTime createdDate, Category category, string description = null!)
     {
@@ -39,6 +46,7 @@ public class Product : EntityBase
         Description = description;
         CreatedDate = createdDate;
         Category = category;
+        CategoryId = category.Id;
     }
 
     public Result Update(string name, decimal price, int quantity, bool isInStock, string description, Category category)

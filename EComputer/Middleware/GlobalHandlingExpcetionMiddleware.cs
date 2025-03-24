@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Infrasctructure.Middleware;
+namespace Api.Middleware;
 
 public class GlobalHandlingExpcetionMiddleware(RequestDelegate next)
 {
@@ -10,7 +10,7 @@ public class GlobalHandlingExpcetionMiddleware(RequestDelegate next)
     {
         try
         {
-          await _next(context);
+            await _next(context);
         }
         catch
         {

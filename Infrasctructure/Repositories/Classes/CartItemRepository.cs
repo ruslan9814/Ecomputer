@@ -34,7 +34,8 @@ public class CartItemRepository(ApplicationDbContext dbContext, ICacheEntityServ
         var item = await _dbContext.CartItems
             .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == productId);
 
-        return item is null ? throw new KeyNotFoundException($"CartItem with CartId {cartId} and ProductId {productId} not found.") : item;
+        return item is null ? throw new 
+            KeyNotFoundException($"CartItem with CartId {cartId} and ProductId {productId} not found.") : item;
     }
 
     public async Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId)
@@ -51,6 +52,13 @@ public class CartItemRepository(ApplicationDbContext dbContext, ICacheEntityServ
             .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == productId)
             ?? throw new KeyNotFoundException($"CartItem with CartId {cartId} and ProductId {productId} not found.");
         _dbContext.CartItems.Remove(item);
+    }
+
+    public async Task<CartItem?> GetWithProductAsync(int id)
+    {
+        return await _dbContext.CartItems
+            .Include(ci => ci.Product)
+            .FirstOrDefaultAsync(ci => ci.Id == id);
     }
 
 }

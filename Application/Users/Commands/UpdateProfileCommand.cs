@@ -5,15 +5,15 @@ namespace Application.Users.Commands;
 
 public sealed record UpdateProfileCommand(int UserId, string Name, string Address) : IRequest<Result>;
 
-
-public sealed class UpdateProfileCommandHandler(
+internal sealed class UpdateProfileCommandHandler(
     IUserRepository userRepository, 
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProfileCommand, Result>
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateProfileCommand request, 
+        CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetAsync(request.UserId);
 
@@ -25,7 +25,7 @@ public sealed class UpdateProfileCommandHandler(
         user.Name = request.Name;
         user.Address = request.Address;
 
-        await _userRepository.UpdateAsync(user);
+        await _userRepository.UpdateAsync(user, cancellationToken);
         await _unitOfWork.Commit();
 
         return Result.Success();

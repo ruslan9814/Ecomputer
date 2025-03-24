@@ -8,4 +8,5 @@ public interface ICartItemRepository : IBaseRepository<CartItem>
     Task RemoveFromCartAsync(int cartId, int porductId);
     Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId);
     Task<CartItem> FindItemInCartAsync(int cartId, int productId);
+    Task<CartItem> GetWithProductAsync(int cartId);
 }

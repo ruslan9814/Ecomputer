@@ -4,36 +4,40 @@ using Infrasctructure.Repositories.Interfaces;
 namespace Application.CartItems.Queries;
 
 public sealed record GetByIdCartItemQuery(int Id) : IRequest<Result<CartItemDto>>;
-public sealed record GetByIdCartItemQueryHandler(ICartItemRepository CartItemRepository)
+internal sealed record GetByIdCartItemQueryHandler(ICartItemRepository CartItemRepository)
     : IRequestHandler<GetByIdCartItemQuery, Result<CartItemDto>>
 {
     private readonly ICartItemRepository _cartItemRepository = CartItemRepository;
 
-    public async Task<Result<CartItemDto>> Handle(GetByIdCartItemQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CartItemDto>> Handle(GetByIdCartItemQuery request, 
+        CancellationToken cancellationToken)
     {
-        var isExist = await _cartItemRepository.IsExistAsync(request.Id);
 
-        if (!isExist)
+        var cartItem = await _cartItemRepository.GetWithProductAsync(request.Id);
+
+        if (cartItem is null)
         {
             return Result.Failure<CartItemDto>(
                 $"Элемент корзины с ID {request.Id} не найден.");
         }
 
-        var cartItem = await _cartItemRepository.GetAsync(request.Id);
+        if (cartItem.Product is null)
+        {
+            return Result.Failure<CartItemDto>(
+                $"Продукт для элемента корзины с ID {request.Id} не найден.");
+        }
 
         var response = new CartItemDto(
             cartItem.Id,
             cartItem.Quantity,
             new ProductDto(
                 cartItem.ProductId,
-                cartItem.Product.Name,
-                cartItem.Product.Description,
+                cartItem.Product.Name ?? string.Empty, 
+                cartItem.Product.Description ?? string.Empty,
                 cartItem.Product.Price,
                 cartItem.Product.IsInStock,
                 cartItem.Product.CreatedDate,
-                new CategoryDto(cartItem.Product.Category.Id, cartItem.Product.Category.Name)
-                ));
-
+                cartItem.Product.CategoryId));
 
         return Result.Success(response);
     }

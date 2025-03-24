@@ -14,7 +14,7 @@ public sealed record AddProductCommand(
     string Description
 ) : IRequest<Result>;
 
-public sealed class AddProductCommandHandler(
+internal sealed class AddProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
     ICategoryRepository categoryRepository) : IRequestHandler<AddProductCommand, Result>
@@ -23,9 +23,11 @@ public sealed class AddProductCommandHandler(
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(AddProductCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddProductCommand request, 
+        CancellationToken cancellationToken)
     {
-        var isCategoryExist = await _productRepository.IsExistAsync(request.CategoryId);
+        var isCategoryExist = await _categoryRepository.IsExistAsync(request.CategoryId);
+
         if (!isCategoryExist)
         {
             return Result.Failure("Категории не существует.");
