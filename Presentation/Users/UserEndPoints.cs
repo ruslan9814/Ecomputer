@@ -20,6 +20,7 @@ public sealed class UserEndPoints : CarterModule
         user.MapPut("/{UserId}", UpdateUsers);
         user.MapDelete("/{UserId}", RemoveUsers);
         user.MapGet("/confirm-email/{token}", ConfirmEmail);
+        user.MapPost("/logout", Logout);
     }
 
     public async Task<IResult> ConfirmEmail(string token, string returnUrl, ISender sender)
@@ -72,6 +73,14 @@ public sealed class UserEndPoints : CarterModule
         var response = await sender.Send(new DeleteUserByIdCommand(request.Id));
         return response.IsFailure ?
             Results.BadRequest(response.Error)
+            : Results.Ok(response);
+    }
+
+    public async Task<IResult> Logout(LogoutUserRequest logout,ISender sender)///////////////////
+    {
+        var response = await sender.Send(new LogoutUserCommand(logout.Token));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
             : Results.Ok(response);
     }
 }

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Infrasctructure\Infrasctructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Orders\Commands\" />
+  </ItemGroup>
+
 </Project>

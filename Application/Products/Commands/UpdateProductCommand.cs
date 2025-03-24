@@ -13,7 +13,7 @@ public sealed record UpdateProductCommand(
     int CategoryId
 ) : IRequest<Result>;
 
-public sealed class UpdateProductCommandHandler(
+internal sealed class UpdateProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
     ICategoryRepository categoryRepository) : IRequestHandler<UpdateProductCommand, Result>

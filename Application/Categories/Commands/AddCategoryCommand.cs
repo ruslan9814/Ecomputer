@@ -7,7 +7,7 @@ namespace Application.Categories.Commands;
 
 public sealed record AddCategoryCommand(int Id, string Name) : IRequest<Result>;
 
-public class AddCategoryCommandHandler(IUnitOfWork unitOfWork, ICategoryRepository categoryRepository) : 
+internal sealed class AddCategoryCommandHandler(IUnitOfWork unitOfWork, ICategoryRepository categoryRepository) : 
     IRequestHandler<AddCategoryCommand, Result>
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;

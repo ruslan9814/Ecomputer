@@ -13,7 +13,8 @@ public sealed record GetFilterProductQuery(
     int PageNumber = 1,
     int PageSize = 8) : IRequest<Result<ResultPage<ProductDto>>>;
 
-public sealed class GetFilterProductQueryHandler(IProductRepository productRepository) : IRequestHandler<GetFilterProductQuery, Result<ResultPage<ProductDto>>>
+internal sealed class GetFilterProductQueryHandler(IProductRepository productRepository) :
+    IRequestHandler<GetFilterProductQuery, Result<ResultPage<ProductDto>>>
 {
     private readonly IProductRepository _productRepository = productRepository;
 

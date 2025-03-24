@@ -50,4 +50,30 @@ public class CacheEntityService(IDistributedCache cache) : ICacheEntityService
        var key = GetKey<TEntity>(id);
        await _cache.RemoveAsync(key);
     }
+
+
+
+    //public async Task<bool> IsExistsToken(string token) //////////эти методы добавить в сам middleware blackList
+    //{
+    //    var key = $"Token-{token}";
+    //    var cachedData = await _cache.GetStringAsync(key);
+    //    return cachedData is not null;
+    //}
+
+    //public async Task SetTokenAsync(string token, TimeSpan? absoluteExpirationRelativeToNow = null)//////////эти методы добавить в сам middleware blackList
+    //{
+    //    var key = $"Token-{token}";
+    //    var options = new DistributedCacheEntryOptions
+    //    {
+    //        AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow ?? TimeSpan.FromMinutes(5),
+    //    };
+    //    await _cache.SetStringAsync(key, token, options);
+    //}
+
+    //public async Task DeleteTokenAsync(string token)//////////эти методы добавить в сам middleware blackList
+    //{
+    //    var key = $"Token-{token}";
+    //    await _cache.RemoveAsync(key);
+    //}
+
 }

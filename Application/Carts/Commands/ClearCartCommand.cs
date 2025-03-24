@@ -6,7 +6,7 @@ namespace Application.Carts.Commands;
 
 public sealed record ClearCartCommand(int Id) : IRequest<Result>;
 
-public sealed class ClearCartCommandHandler(
+internal sealed class ClearCartCommandHandler(
     ICartRepository cartRepository, IUnitOfWork unitOfWork) 
     : IRequestHandler<ClearCartCommand, Result>
 {

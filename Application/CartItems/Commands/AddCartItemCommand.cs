@@ -11,7 +11,7 @@ public sealed record AddCartItemCommand(
     ) : IRequest<Result>;
 
 
-public sealed class AddCartItemCommandHandler(
+internal sealed class AddCartItemCommandHandler(
     ICartRepository cartRepository,
     IProductRepository productRepository,
     ICartItemRepository cartItemRepository,

@@ -5,7 +5,7 @@ namespace Application.Users.Queries;
 
 public sealed record GetUserQuery(int Id) : IRequest<Result<UserDto>>;
 
-public sealed class GetUserQueryHandler(IUserRepository userRepository) : IRequestHandler<GetUserQuery, Result<UserDto>>
+internal sealed class GetUserQueryHandler(IUserRepository userRepository) : IRequestHandler<GetUserQuery, Result<UserDto>>
 {
     private readonly IUserRepository _userRepository = userRepository;
     public async Task<Result<UserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)

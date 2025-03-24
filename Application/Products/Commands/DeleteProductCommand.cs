@@ -5,7 +5,7 @@ namespace Application.Products.Commands;
 
 public sealed record DeleteProductCommand(int ProductId) : IRequest<Result>;
 
-public sealed class DeleteProductCommandHandler(
+internal sealed class DeleteProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork
 ) : IRequestHandler<DeleteProductCommand, Result>

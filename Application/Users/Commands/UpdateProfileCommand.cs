@@ -5,8 +5,7 @@ namespace Application.Users.Commands;
 
 public sealed record UpdateProfileCommand(int UserId, string Name, string Address) : IRequest<Result>;
 
-
-public sealed class UpdateProfileCommandHandler(
+internal sealed class UpdateProfileCommandHandler(
     IUserRepository userRepository, 
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProfileCommand, Result>
 {

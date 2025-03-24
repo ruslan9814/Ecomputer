@@ -6,7 +6,7 @@ namespace Application.CartItems.Commands;
 
 public sealed record RemoveCartItemCommand(int Id) : IRequest<Result>;
 
-public sealed class RemoveCartItemCommandHandler(
+internal sealed class RemoveCartItemCommandHandler(
     ICartItemRepository cartItemRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RemoveCartItemCommand, Result>
 {

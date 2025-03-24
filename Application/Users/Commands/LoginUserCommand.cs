@@ -5,7 +5,7 @@ using Infrasctructure.PasswordHasher;
 namespace Application.Users.Commands;
 public sealed record LoginUserCommand(string Email, string Password) : IRequest<Result<string>>;
 
-public sealed class LoginUserCommandHandler(IUserRepository userRepository, IJwtService jwtService,
+internal sealed class LoginUserCommandHandler(IUserRepository userRepository, IJwtService jwtService,
     IPasswordHasher passwordHasher) : IRequestHandler<LoginUserCommand, Result<string>>
 {
     private readonly IUserRepository _userRepository = userRepository;

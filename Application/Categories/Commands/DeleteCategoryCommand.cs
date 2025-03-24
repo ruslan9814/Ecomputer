@@ -5,7 +5,7 @@ namespace Application.Categories.Commands;
 
 public sealed record DeleteCategoryCommand(int Id) : IRequest<Result>;
 
-public sealed class DeleteCategoryCommandHandler(IUnitOfWork unitOfWork, ICategoryRepository categoryRepository) : 
+internal sealed class DeleteCategoryCommandHandler(IUnitOfWork unitOfWork, ICategoryRepository categoryRepository) : 
     IRequestHandler<DeleteCategoryCommand, Result>
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;

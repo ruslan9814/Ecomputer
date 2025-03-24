@@ -4,7 +4,7 @@ using Infrasctructure.UnitOfWork;
 namespace Application.Users.Commands;
 public sealed record DeleteUserByIdCommand(int Id) : IRequest<Result>;
 
-public sealed class DeleteUserByIdCommandHandler(
+internal sealed class DeleteUserByIdCommandHandler(
     IUserRepository userRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteUserByIdCommand, Result>
 {

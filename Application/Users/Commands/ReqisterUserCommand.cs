@@ -14,11 +14,11 @@ public sealed record RegisterUserCommand(
     Role Role, 
     string ReturnUrl) : IRequest<Result>;
 
-public sealed class RegisterUserCommandHandler(IUserRepository userRepository, 
+internal sealed class RegisterUserCommandHandler(IFavoritesRepository favoritesRepository, IUserRepository userRepository, 
     IPasswordHasher passwordHasher, IUnitOfWork unitOfWork, IEmailSenderService emailSender) 
     : IRequestHandler<RegisterUserCommand, Result>
 {
-
+    private readonly IFavoritesRepository _favoritesRepository = favoritesRepository;
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -44,7 +44,6 @@ public sealed class RegisterUserCommandHandler(IUserRepository userRepository,
             isEmailConfirmed: false,
             confirmationToken,
             request.Role);
-        
 
         var confirmationLink = $"http://localhost:5000/api/user/confirm-email/{confirmationToken}?returnUrl={request.ReturnUrl}";
 
@@ -52,6 +51,10 @@ public sealed class RegisterUserCommandHandler(IUserRepository userRepository,
             $"Для подтверждения регистрации перейдите по <a href='{confirmationLink}'>ссылке</a>.");
 
         await _userRepository.AddAsync(user);
+        await _unitOfWork.Commit();
+
+        var favorites = new Domain.Favorites.Favorite(user.Id);/////////////think about it and Cart too
+        await _favoritesRepository.AddAsync(favorites);
         await _unitOfWork.Commit();
 
         return Result.Success();

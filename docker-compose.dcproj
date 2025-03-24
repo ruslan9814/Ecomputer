@@ -7,7 +7,7 @@
     <ProjectGuid>53945166-74f7-463f-bce8-d76c140450f6</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
-    <DockerServiceName>test</DockerServiceName>
+    <DockerServiceName>EComputer</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

@@ -5,7 +5,7 @@ namespace Application.Categories.Queries;
 
 public sealed record GetByIdCategoryQuery(int Id) : IRequest<Result<CategoryDto>>;
 
-public sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRepository) : 
+internal sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRepository) : 
     IRequestHandler<GetByIdCategoryQuery, Result<CategoryDto>>
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;

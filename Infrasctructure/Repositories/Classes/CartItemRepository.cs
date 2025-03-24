@@ -34,7 +34,8 @@ public class CartItemRepository(ApplicationDbContext dbContext, ICacheEntityServ
         var item = await _dbContext.CartItems
             .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == productId);
 
-        return item is null ? throw new KeyNotFoundException($"CartItem with CartId {cartId} and ProductId {productId} not found.") : item;
+        return item is null ? throw new 
+            KeyNotFoundException($"CartItem with CartId {cartId} and ProductId {productId} not found.") : item;
     }
 
     public async Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId)

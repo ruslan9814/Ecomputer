@@ -1,5 +1,6 @@
 ﻿using Domain.Carts;
-using Domain.Core;
+using Domain.Favorites;
+using Domain.Orders;
 
 namespace Domain.Users;
 
@@ -15,7 +16,9 @@ public class User : EntityBase
     public string RefreshToken { get; set; }
     public DateTime RefreshTokenExpirationDate { get; set; }
     public Cart? Cart { get; set; }
+    public Favorite? Favorite { get; set; }
     public Role Role { get; set; }
+    public ICollection<Order> Orders { get; set; } = [];
 
 
 #pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.

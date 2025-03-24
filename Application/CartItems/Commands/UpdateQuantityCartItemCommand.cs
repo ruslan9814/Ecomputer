@@ -5,7 +5,7 @@ namespace Application.CartItems.Commands;
 
 public sealed record UpdateQuantityCartItemCommand(int Id, int Quantity) : IRequest<Result>;
 
-public sealed class UpdateQuantityCartItemCommandHandler(
+internal sealed class UpdateQuantityCartItemCommandHandler(
     ICartItemRepository cartItemRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateQuantityCartItemCommand, Result>
 {

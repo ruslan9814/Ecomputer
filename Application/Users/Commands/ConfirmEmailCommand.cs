@@ -6,7 +6,7 @@ namespace Application.Users.Commands;
 public sealed record ConfirmEmailCommand(string Token)
     : IRequest<Result>;
 
-public sealed record ConfirmEmailCommandHandler(
+internal sealed record ConfirmEmailCommandHandler(
     IUserRepository UserRepository,
     IUnitOfWork UnitOfWork)
     : IRequestHandler<ConfirmEmailCommand, Result>

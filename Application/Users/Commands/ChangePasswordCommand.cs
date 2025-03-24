@@ -9,7 +9,7 @@ public sealed record ChangePasswordCommand(
     string NewPassword) : IRequest<Result>;
 
 
-public sealed class ChangePasswordCommandHandler(
+internal sealed class ChangePasswordCommandHandler(
     IUserRepository userRepository, 
     IPasswordHasher passwordHasher, 
     IUnitOfWork unitOfWork) 

@@ -5,7 +5,7 @@ namespace Application.Carts.Queries;
 
 public sealed record GetByUserIdCartQuery(int UserId) : IRequest<Result<CartDto>>;
 
-public sealed class GetByUserIdCartQueryHandler(ICartRepository cartRepository) 
+internal sealed class GetByUserIdCartQueryHandler(ICartRepository cartRepository) 
     : IRequestHandler<GetByUserIdCartQuery, Result<CartDto>>
 {
     private readonly ICartRepository _cartRepository = cartRepository;

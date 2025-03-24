@@ -4,7 +4,7 @@ using Application.CartItems.Queries;
 using Presentation.CartItems.Requests;
 using Microsoft.AspNetCore.Http;
 using MediatR;
-using Api;
+using EComputer;
 
 namespace Presentation.CartItems;
 
@@ -39,8 +39,6 @@ public sealed class CartItemEndPoints : CarterModule
         return response.IsFailure ?
             Results.BadRequest(response.Error) : Results.Ok(response);
     }
-
-
 
     public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest request, ISender sender)
     {

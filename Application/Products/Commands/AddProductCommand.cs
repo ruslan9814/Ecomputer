@@ -14,7 +14,7 @@ public sealed record AddProductCommand(
     string Description
 ) : IRequest<Result>;
 
-public sealed class AddProductCommandHandler(
+internal sealed class AddProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
     ICategoryRepository categoryRepository) : IRequestHandler<AddProductCommand, Result>

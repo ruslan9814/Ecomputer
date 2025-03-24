@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Middleware;
 
-public class InputValidationActionFilter(ILogger<InputValidationActionFilter> logger) : IActionFilter
+public class InputValidationActionFilter(ILogger<InputValidationActionFilter> logger)
 {
     private readonly ILogger<InputValidationActionFilter> _logger = logger;
 
-    public void OnActionExecuting(ActionExecutingContext context) // это нужно исправить и сделать чтобы правильно работало
+    public async void OnActionExecuting(ActionExecutingContext context) // это нужно исправить и сделать чтобы правильно работало
     {
         if (context.ModelState.IsValid)
         {
@@ -40,6 +40,8 @@ public class InputValidationActionFilter(ILogger<InputValidationActionFilter> lo
             StatusCode = 400
         };
 
+        await Task.CompletedTask;
+
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
@@ -47,4 +49,5 @@ public class InputValidationActionFilter(ILogger<InputValidationActionFilter> lo
 
 
     }
+
 }

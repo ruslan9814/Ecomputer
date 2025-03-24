@@ -4,7 +4,7 @@ using Infrasctructure.Repositories.Interfaces;
 namespace Application.CartItems.Queries;
 
 public sealed record GetByIdCartItemQuery(int Id) : IRequest<Result<CartItemDto>>;
-public sealed record GetByIdCartItemQueryHandler(ICartItemRepository CartItemRepository)
+internal sealed record GetByIdCartItemQueryHandler(ICartItemRepository CartItemRepository)
     : IRequestHandler<GetByIdCartItemQuery, Result<CartItemDto>>
 {
     private readonly ICartItemRepository _cartItemRepository = CartItemRepository;

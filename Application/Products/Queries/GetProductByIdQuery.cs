@@ -5,7 +5,8 @@ namespace Application.Products.Queries;
 
 public sealed record GetProductByIdQuery(int Id) : IRequest<Result<ProductDto>>;
 
-public sealed class GetProductByIdQueryHandler(IProductRepository productRepository) : IRequestHandler<GetProductByIdQuery, Result<ProductDto>>
+internal sealed class GetProductByIdQueryHandler(IProductRepository productRepository) : 
+    IRequestHandler<GetProductByIdQuery, Result<ProductDto>>
 {
     private readonly IProductRepository _productRepository = productRepository;
 
