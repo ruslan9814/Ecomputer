@@ -10,16 +10,16 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Копируем проект EComputer/Api.csproj в текущую директорию
-COPY ["EComputer/Api.csproj", "./"]
+COPY ["EComputer/Api.csproj", "EComputer/"]
 
 # Восстанавливаем зависимости
-RUN dotnet restore "Api.csproj"
+RUN dotnet restore "EComputer/Api.csproj"
 
 # Копируем остальные файлы проекта
-COPY . .
+COPY . . 
 
 # Собираем проект
-WORKDIR "/src"
+WORKDIR "/src/EComputer"
 RUN dotnet build "Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Публикуем проект
@@ -31,7 +31,7 @@ FROM base AS final
 WORKDIR /app
 
 # Копируем опубликованный проект
-COPY --from=publish /app/publish . 
+COPY --from=publish /app/publish .
 
 # Устанавливаем точку входа для приложения
 ENTRYPOINT ["dotnet", "Api.dll"]

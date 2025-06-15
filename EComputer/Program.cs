@@ -1,4 +1,4 @@
-using Carter;
+п»їusing Carter;
 using Microsoft.EntityFrameworkCore;
 using Infrasctructure.Database;
 using Infrasctructure.Cache;
@@ -13,19 +13,26 @@ using Presentation.Users;
 using Api.Middleware;
 using Infrasctructure.BlackList;
 using Application.Orders.Queries;
+using Asp.Versioning;
+using Microsoft.OpenApi.Models;
+using Infrasctructure.Email;
+using Infrasctructure.CurrentUser;
 
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", builder =>
-//    {
-//        builder.AllowAnyOrigin() // Разрешить любой источник
-//               .AllowAnyMethod() // Разрешить любой HTTP метод
-//               .AllowAnyHeader(); // Разрешить любые заголовки
-//    });
-//});
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policyBuilder =>
+    {
+        policyBuilder.WithOrigins("http://localhost:3000")  
+                     .AllowAnyHeader()
+                     .AllowAnyMethod()
+                     .AllowCredentials();
+    });
+});
 
 builder.Services.Configure<EmailSettingsService>(builder.Configuration.GetSection("EmailSettings"));
 
@@ -41,8 +48,11 @@ builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<ICacheEntityService, CacheEntityService>();
-builder.Services.AddTransient<IEmailSenderService ,EmailSenderService>();
+builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
 builder.Services.AddTransient<IBlackListService, BlackListService>();
+builder.Services.AddTransient<IProductReviewRepository, ProductReviewRepository>();
+builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
+
 
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(GetOrderCommand).Assembly));
 
@@ -54,48 +64,112 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddStackExchangeRedisCache(x =>
     x.Configuration = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"));
 
-
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
+builder.Services.AddControllers(options =>
+    options.Filters.AddService<InputValidationActionFilter>());
 
-//builder.Services.AddControllers(options =>
-//options.Filters.AddService<InputValidationActionFilter>());
 
-builder.Services.AddJwtAuthentication(builder.Configuration);/////////////
-builder.Services.AddJwtAuthorization();//////////////
+builder.Services.AddJwtAuthentication(builder.Configuration); 
+builder.Services.AddJwtAuthorization();
 
 builder.Services.AddCarter(
     new DependencyContextAssemblyCatalog(
         [
-            typeof(UserEndPoints).Assembly
+            typeof(User).Assembly
         ]));
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services
+       .AddApiVersioning(options => options.ApiVersionReader = new UrlSegmentApiVersionReader()) 
+       .AddApiExplorer(options =>                                                               
+       {
+           options.GroupNameFormat = "'v'VVV";
+           options.SubstituteApiVersionInUrl = true;
+       });
 
+var securityScheme = new OpenApiSecurityScheme()
+{
+    Name = "Authorization",
+    Type = SecuritySchemeType.ApiKey,
+    Scheme = "Bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "JSON Web Token based security",
+};
+
+var securityReq = new OpenApiSecurityRequirement()
+{
+    {
+        new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            }
+        },
+        Array.Empty<string>()
+    }
+};
+
+var contact = new OpenApiContact()
+{
+    Name = "Mohamad Lawand",
+    Email = "hello@mohamadlawand.com",
+    Url = new Uri("http://www.mohamadlawand.com")
+};
+
+var license = new OpenApiLicense()
+{
+    Name = "Free License",
+    Url = new Uri("http://www.mohamadlawand.com")
+};
+
+var info = new OpenApiInfo()
+{
+    Version = "v1",
+    Title = "Minimal API - JWT Authentication with Swagger demo",
+    Description = "Implementing JWT Authentication in Minimal API",
+    TermsOfService = new Uri("http://www.example.com"),
+    Contact = contact,
+    License = license
+};
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(o =>
+{
+    o.SwaggerDoc("v1", info);
+    o.AddSecurityDefinition("Bearer", securityScheme);
+    o.AddSecurityRequirement(securityReq);
+});
 
 var app = builder.Build();
 
-app.UseMiddleware<GlobalHandlingExpcetionMiddleware>();////////////////////////////////////////////
-app.UseMiddleware<TokenBlackListMiddleware>();////////////////////////////////////////////
-//app.UseMiddleware<InputValidationActionFilter>();////////////////////////////////////////////
+
+app.UseMiddleware<GlobalHandlingExpcetionMiddleware>(); 
 
 
-app.MigrateDbContext<ApplicationDbContext>();
+app.UseCors("AllowFrontend");
 
-if (app.Environment.IsDevelopment())
-{
+
+app.UseMiddleware<TokenBlackListMiddleware>(); 
+
+
+app.MigrateDbContext<ApplicationDbContext>();  
+
+
+//if (app.Environment.IsDevelopment())
+//{
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-// Использование CORS
-//app.UseCors("AllowAll"); // Добавьте эту строку для включения CORS
+//}
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapCarter();
 
+
 app.Run();
+

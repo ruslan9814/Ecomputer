@@ -11,6 +11,7 @@ public class TokenBlackListMiddleware(RequestDelegate next, IBlackListService bl
     public async Task Invoke(HttpContext context)
     {
         var authHeader = context.Request.Headers.Authorization.ToString();
+
         if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
         {
             await _next(context);
@@ -21,14 +22,12 @@ public class TokenBlackListMiddleware(RequestDelegate next, IBlackListService bl
 
         if (!IsValidJwt(token))
         {
-
             await _next(context);
             return;
         }
 
         if (await _blackList.IsExistsToken(token))
         {
-
             context.Response.StatusCode = 401;
             await context.Response.WriteAsync("Token has been revoked");
             return;
@@ -40,8 +39,6 @@ public class TokenBlackListMiddleware(RequestDelegate next, IBlackListService bl
     private static bool IsValidJwt(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var jwtToken = tokenHandler.CanReadToken(token);
-
-        return jwtToken;
+        return tokenHandler.CanReadToken(token);
     }
 }

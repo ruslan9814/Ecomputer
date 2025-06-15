@@ -9,22 +9,24 @@ internal sealed class GetUserQueryHandler(IUserRepository userRepository)
     : IRequestHandler<GetUserQuery, Result<UserDto>>
 {
     private readonly IUserRepository _userRepository = userRepository;
-    public async Task<Result<UserDto>> Handle(GetUserQuery request, 
-        CancellationToken cancellationToken)
+
+    public async Task<Result<UserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var userIsExists = await _userRepository.IsExistAsync(request.Id);
-        if (!userIsExists)
+    
+        if (!await _userRepository.IsExistAsync(request.Id))
         {
-            return Result.Failure<UserDto>($"Продукт с ID {request.Id} не найден.");
+            return Result.Failure<UserDto>($"Пользователь с ID {request.Id} не найден.");
         }
 
         var user = await _userRepository.GetAsync(request.Id);
-
+       
         var response = new UserDto(
             user.Id,
+            user.Name,
             user.Email,
-            user.Name
+            user.Address
         );
+
         return Result.Success(response);
     }
 }

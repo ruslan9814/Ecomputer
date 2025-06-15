@@ -1,24 +1,27 @@
 ﻿using Domain.Favorites;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrasctructure.Database.Configurations;
-
-public class FavoritesConfiguration
+public class FavoritesConfiguration : IEntityTypeConfiguration<Favorite>
 {
     public void Configure(EntityTypeBuilder<Favorite> builder)
     {
         builder.ToTable("Favorites");
-        builder.HasKey(favorites => favorites.Id);
-        builder.Property(favorites => favorites.UserId_FK)
+
+        builder.HasKey(f => f.Id);
+
+        builder.Property(f => f.UserId)
                .IsRequired();
-        builder.HasOne(favorites => favorites.User)
-               .WithMany()
-               .HasForeignKey(favorites => favorites.UserId_FK)
+
+        builder.HasOne(f => f.User)
+               .WithOne(u => u.Favorite)
+               .HasForeignKey<Favorite>(f => f.UserId)
                .OnDelete(DeleteBehavior.Restrict);
-        builder.HasMany(favorites => favorites.Products)
-               .WithOne()
-               .HasForeignKey(product => product.Id)
-               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(f => f.FavoriteProducts)
+               .WithOne(fp => fp.Favorite)
+               .HasForeignKey(fp => fp.FavoriteId);
+
     }
 }

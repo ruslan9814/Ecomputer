@@ -6,51 +6,59 @@ namespace Domain.Favorites;
 
 public class Favorite : EntityBase
 {
-    public int UserId_FK { get; set; }
+    public int UserId { get; set; }
 
     [JsonIgnore]
-    public User User { get; set; }
-    public ICollection<Product> Products { get; set; } = [];
+    public User? User { get; set; }
 
-    private Favorite() { }
-#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
+    public ICollection<FavoriteProduct> FavoriteProducts { get; set; } = new List<FavoriteProduct>();
 
-    public Favorite(User user)
+    private Favorite()
+    {
+    }
+
+    public Favorite(int id, int UserId) : base(id)
+    {
+        this.UserId = UserId;
+    }
+
+    public Favorite(User user) : base(0)
     {
         User = user;
-    }
-    public Favorite(int userId, ICollection<Product> products)
-#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
-    {
-        UserId_FK = userId;
-        Products = products;
-    }
-
-#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
-    public Favorite(int userId)
-#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
-    {
-        UserId_FK = userId;
+        UserId = user.Id;
     }
 
     public Result AddProduct(Product product)
     {
-        if (Products.Contains(product))
+        if (FavoriteProducts.Any(fp => fp.ProductId == product.Id))
         {
             return Result.Failure("Товар уже добавлен в избранное.");
         }
-        Products.Add(product);
+
+        FavoriteProducts.Add(new FavoriteProduct
+        {
+            ProductId = product.Id,
+            Product = product,
+            Favorite = this
+        });
+
         return Result.Success();
     }
 
     public Result RemoveProduct(int productId)
     {
-        var productToRemove = Products.FirstOrDefault(p => p.Id == productId);
-        if (productToRemove is null)
+        var item = FavoriteProducts.FirstOrDefault(fp => fp.ProductId == productId);
+        if (item is null)
         {
             return Result.Failure("Товар не найден.");
         }
-        Products.Remove(productToRemove);
+
+        FavoriteProducts.Remove(item);
         return Result.Success();
+    }
+
+    public bool ContainsProduct(int productId)
+    {
+        return FavoriteProducts.Any(fp => fp.ProductId == productId);
     }
 }

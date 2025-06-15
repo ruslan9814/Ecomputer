@@ -2,19 +2,19 @@
 using Infrasctructure.Repositories.Interfaces;
 using Infrasctructure.UnitOfWork;
 
-
 namespace Application.Categories.Commands;
 
 public sealed record AddCategoryCommand(string Name) : IRequest<Result>;
 
-internal sealed class AddCategoryCommandHandler(IUnitOfWork unitOfWork, 
-    ICategoryRepository categoryRepository) : IRequestHandler<AddCategoryCommand, Result>
+internal sealed class AddCategoryCommandHandler(
+    IUnitOfWork unitOfWork,
+    ICategoryRepository categoryRepository
+) : IRequestHandler<AddCategoryCommand, Result>
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(AddCategoryCommand request, 
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddCategoryCommand request, CancellationToken cancellationToken)
     {
         var categoryIsExist = await _categoryRepository.IsExistByNameAsync(request.Name);
 
@@ -29,6 +29,5 @@ internal sealed class AddCategoryCommandHandler(IUnitOfWork unitOfWork,
         await _unitOfWork.Commit();
 
         return Result.Success();
-
     }
 }

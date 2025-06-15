@@ -14,16 +14,17 @@ public sealed record RegisterUserCommand(
     string Password,
     string Name,
     string Address,
-    Role Role, 
+    Role Role,
     string ReturnUrl) : IRequest<Result>;
 
-internal sealed class RegisterUserCommandHandler(IFavoritesRepository favoritesRepository, 
-    IUserRepository userRepository, IPasswordHasher passwordHasher, 
-    IUnitOfWork unitOfWork, IConfiguration configuration,
-    IEmailSenderService emailSender, IJwtService jwtService) 
-    : IRequestHandler<RegisterUserCommand, Result>
+internal sealed class RegisterUserCommandHandler(
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    IUnitOfWork unitOfWork,
+    IEmailSenderService emailSender,
+    IJwtService jwtService,
+    IConfiguration configuration) : IRequestHandler<RegisterUserCommand, Result>
 {
-    private readonly IFavoritesRepository _favoritesRepository = favoritesRepository;
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -31,9 +32,9 @@ internal sealed class RegisterUserCommandHandler(IFavoritesRepository favoritesR
     private readonly IJwtService _jwtService = jwtService;
     private readonly IConfiguration _configuration = configuration;
 
-    public async Task<Result> Handle(RegisterUserCommand request, 
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
+  
         var userIsExist = await _userRepository.IsEmailExistAsync(request.Email, cancellationToken);
 
         if (userIsExist)
@@ -41,9 +42,11 @@ internal sealed class RegisterUserCommandHandler(IFavoritesRepository favoritesR
             return Result.Failure("Пользователь с таким email уже существует.");
         }
 
+       
         var hashPassword = _passwordHasher.HashPassword(request.Password);
         var confirmationToken = Guid.NewGuid().ToString();
         var refreshToken = _jwtService.GenerateRefreshToken();
+
 
         var user = new User(
             request.Name,
@@ -52,36 +55,31 @@ internal sealed class RegisterUserCommandHandler(IFavoritesRepository favoritesR
             request.Address,
             isEmailConfirmed: false,
             confirmationToken,
-            request.Role)
+            request.Role
+        )
         {
             RefreshToken = refreshToken,
-            RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_configuration
-            .GetValue<int>("Jwt:RefreshTokenTTLDays"))
+            RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenTTLDays"))
         };
 
         var encodedToken = WebUtility.UrlEncode(confirmationToken);
         var confirmationLink = $"{GetBaseUrl()}/api/user/confirm-email/{encodedToken}?returnUrl=" +
             $"{WebUtility.UrlEncode(request.ReturnUrl)}";
 
+       
         await _emailSender.SendEmailAsync(user.Email, "Подтвердите ваш email",
             $"Для подтверждения регистрации перейдите по <a href='{confirmationLink}'>ссылке</a>.");
 
+
         await _userRepository.AddAsync(user);
-        await _unitOfWork.Commit();
-
-        var favorites = new Domain.Favorites.Favorite(user.Id);/////////////think about it and Cart too
-        await _favoritesRepository.AddAsync(favorites);
-
         await _unitOfWork.Commit();
 
         return Result.Success();
     }
 
+
     private static string GetBaseUrl()
     {
-        return "http://localhost:5000";
+        return "http://localhost:5000";  
     }
 }
-
-
-

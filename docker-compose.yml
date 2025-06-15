@@ -1,8 +1,8 @@
 
 services:
-  Api:
-    container_name: Api
-    image: api:latest
+  test:
+    container_name: test
+    image: test:latest
     build:
       context: .
       dockerfile: EComputer/Dockerfile

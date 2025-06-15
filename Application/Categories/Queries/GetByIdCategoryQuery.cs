@@ -5,13 +5,12 @@ namespace Application.Categories.Queries;
 
 public sealed record GetByIdCategoryQuery(int Id) : IRequest<Result<CategoryDto>>;
 
-internal sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRepository) :
-     IRequestHandler<GetByIdCategoryQuery, Result<CategoryDto>>
+internal sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRepository)
+    : IRequestHandler<GetByIdCategoryQuery, Result<CategoryDto>>
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
 
-    public async Task<Result<CategoryDto>> Handle(GetByIdCategoryQuery request, 
-        CancellationToken cancellationToken)
+    public async Task<Result<CategoryDto>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
     {
         var categoryIsExists = await _categoryRepository.IsExistAsync(request.Id);
         if (!categoryIsExists)
@@ -34,7 +33,10 @@ internal sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRe
                 p.Price,
                 p.IsInStock,
                 p.CreatedDate,
-                p.CategoryId
+                p.Quantity,
+                p.CategoryId,
+                p.Category?.Name ?? string.Empty,
+                p.Rating
             ))
             .ToList();
 
@@ -47,5 +49,3 @@ internal sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRe
         return Result.Success(response);
     }
 }
-
-

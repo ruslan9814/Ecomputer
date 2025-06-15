@@ -1,6 +1,7 @@
 ﻿using Domain.Carts;
 using Domain.Favorites;
 using Domain.Orders;
+using Domain.Products;
 
 namespace Domain.Users;
 
@@ -13,11 +14,12 @@ public class User : EntityBase
     public bool IsEmailConfirmed { get; set; }
     public bool IsBlocked { get; set; }
     public string? ConfirmationToken { get; set; }
-    public string RefreshToken { get; set; }
+    public string RefreshToken { get; set; } 
     public Cart? Cart { get; set; }
+    public Favorite? Favorite { get; set; }
     public Role Role { get; set; }
-    public ICollection<Order> Orders { get; set; } = [];
-    public ICollection<Favorite> Favorites { get; set; } = [];
+    public ICollection<Order> Orders { get; set; } = [];  
+    public ICollection<ProductReview> ProductReviews { get; set; } = []; 
     public DateTime RefreshTokenExpiryTime { get; set; }
 
 
@@ -25,7 +27,8 @@ public class User : EntityBase
     private User() { }
 #pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
 
-    public User(string name, string email, string hashedPassword, string address, bool isEmailConfirmed, string? confirmationToken, Role role)
+    public User(string name, string email, string hashedPassword, string address,
+     bool isEmailConfirmed, string? confirmationToken, Role role) : base(0)
     {
         Name = name;
         Email = email;
@@ -33,10 +36,15 @@ public class User : EntityBase
         Address = address;
         IsEmailConfirmed = isEmailConfirmed;
         ConfirmationToken = confirmationToken;
-        RefreshToken = null!;
+        RefreshToken = string.Empty;
         Role = role;
+        Orders = new List<Order>();
+        ProductReviews = new List<ProductReview>();
         Cart = new Cart(this);
+        Favorite = new Favorite(this);
     }
+
+
 
     public Result Login(bool isVerify)
     {
@@ -53,6 +61,7 @@ public class User : EntityBase
         return Result.Success();
     }
 
+
     public Result ConfirmEmail()
     {
         if (IsEmailConfirmed)
@@ -65,4 +74,5 @@ public class User : EntityBase
 
         return Result.Success();
     }
+  
 }

@@ -1,41 +1,51 @@
-﻿using Domain.Favorites;
-using Domain.Products;
+﻿using Domain.Products;
+using Infrasctructure.CurrentUser;
 using Infrasctructure.Repositories.Interfaces;
 using Infrasctructure.UnitOfWork;
 
 namespace Application.Favorite.Command;
 
-public sealed record AddFavoritesCommand( /// сделать добавление  и удаление прродукта из избранного а сам класс создавать в констукторе юзера
-    int UserId,
-    int ProductId,
-    ICollection<Product> Products
+public sealed record AddFavoritesCommand(
+    int ProductId
 ) : IRequest<Result>;
 
-internal sealed class AddFavoritesCommandHandler(IFavoritesRepository favoritesRepository, 
-    IProductRepository productRepository, IUnitOfWork unitOfWork) :
-    IRequestHandler<AddFavoritesCommand, Result>
+internal sealed class AddFavoritesCommandHandler(
+    IFavoritesRepository favoritesRepository,
+    IProductRepository productRepository,
+    ICurrentUserService currentUserService,
+    IUnitOfWork unitOfWork
+) : IRequestHandler<AddFavoritesCommand, Result>
 {
     private readonly IFavoritesRepository _favoritesRepository = favoritesRepository;
     private readonly IProductRepository _productRepository = productRepository;
+    private readonly ICurrentUserService _currentUserService = currentUserService;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(AddFavoritesCommand request, 
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddFavoritesCommand request, CancellationToken cancellationToken)
     {
-        var favoritesIsExist = await _favoritesRepository.IsExistAsync(request.UserId);
-        if (!favoritesIsExist)
+        var userId = _currentUserService.UserId;
+        if (userId <= 0)
         {
-            return Result.Failure("Favorites already exist.");
+            return Result.Failure("User is not authenticated.");
         }
-        var favorites = await _favoritesRepository.GetAsync(request.UserId);
 
-        var productIsExists = await _productRepository.IsExistAsync(request.ProductId);
-        if (!productIsExists)
+        var favorites = await _favoritesRepository.GetAsync(userId);
+        if (favorites is null)
+        {
+            return Result.Failure("Favorites not found.");
+        }
+
+        var product = await _productRepository.GetAsync(request.ProductId);
+        if (product is null)
         {
             return Result.Failure("Product not found.");
         }
 
-        var product = await _productRepository.GetAsync(request.ProductId);
+        if (favorites.ContainsProduct(product.Id))
+        {
+            return Result.Failure("Product already in favorites.");
+        }
+
         favorites.AddProduct(product);
         await _favoritesRepository.UpdateAsync(favorites);
         await _unitOfWork.Commit();
