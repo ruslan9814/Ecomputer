@@ -3,6 +3,7 @@ using Domain.Users;
 using Infrasctructure.Cache;
 using Infrasctructure.Database;
 using Infrasctructure.Repositories.Interfaces;
+using Domain.Categories;
 
 namespace Infrasctructure.Repositories.Classes;
 
@@ -71,4 +72,23 @@ public class UserRepository(ApplicationDbContext dbContext, ICacheEntityService 
         _dbContext.Users.Update(user);
         await _cache.SetAsync(user, cancellationToken: cancellationToken);
     }
+
+    public async Task<IEnumerable<User>> GetAll(bool includeRelated = false)
+    {
+        var query = _dbContext.Set<User>().AsQueryable();
+        var users = await query.ToListAsync();
+        return users;
+    }
+
+    public async Task UpdateImageUrlAsync(int userId, string imageUrl, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users.FindAsync([userId], cancellationToken);
+        if (user != null)
+        {
+            user.ImageUrl = imageUrl;  
+            _dbContext.Users.Update(user);
+        }
+    }
+
+
 }

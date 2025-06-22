@@ -36,7 +36,8 @@ internal sealed class GetByIdCategoryQueryHandler(ICategoryRepository categoryRe
                 p.Quantity,
                 p.CategoryId,
                 p.Category?.Name ?? string.Empty,
-                p.Rating
+                p.Rating,
+                p.ImageUrl
             ))
             .ToList();
 

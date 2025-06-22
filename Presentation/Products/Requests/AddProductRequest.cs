@@ -1,4 +1,6 @@
-﻿namespace Application.Endpoints.Products.Requests;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Application.Endpoints.Products.Requests;
 
 public sealed record AddProductRequest(
     string Name,
@@ -6,4 +8,5 @@ public sealed record AddProductRequest(
     string Description,
     int Quantity,
     bool IsInStock,
-    int CategoryId);
+    int CategoryId,
+    IFormFile ImageFile);

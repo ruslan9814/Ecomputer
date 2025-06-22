@@ -3,10 +3,13 @@
 public sealed record ProductDto(
     int Id,
     string Name,
-    string? Description,
+    string Description,
     decimal Price,
     bool IsInStock,
     DateTime CreatedDate,
-    int CategoryId
-    //CategoryDto Category
-    );
+    int Quantity,
+    int CategoryId,
+    string CategoryName,
+    double Rating,
+    string ImageUrl  
+);

@@ -1,4 +1,6 @@
-﻿namespace Application.Endpoints.Products.Requests;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Presentation.Products.Requests;
 
 public sealed record UpdateProductRequest(
     int Id,
@@ -7,4 +9,5 @@ public sealed record UpdateProductRequest(
     string Description,
     int Quantity,
     bool IsInStock,
-    int CateqoryId);
+    int CategoryId,
+    IFormFile ImageFile);

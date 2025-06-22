@@ -13,4 +13,7 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<IEnumerable<Order>> GetByStatusAndDateRangeAsync(int statusId, DateTime startDate, DateTime endDate);
     Task<IEnumerable<Order>> GetByUserIdAndDateAsync(int userId, DateTime date);
     Task<IEnumerable<Order>> GetAllOrdersAsync();
+    Task<IEnumerable<Order>> GetUserOrdersAsync(int userId);
+    Task<IEnumerable<object>> GetTopProductsAsync(int topCount = 3);
+    Task<object> GetOrderStatisticsAsync();
 }

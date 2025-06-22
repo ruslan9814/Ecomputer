@@ -48,7 +48,8 @@ public class JwtService(IOptions<JwtOptions> options, IDistributedCache database
         new Claim(JwtRegisteredClaimNames.Email, email),
         new Claim(ClaimTypes.Role, role),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+        new Claim(JwtRegisteredClaimNames.Iat, 
+            DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         ];
 
     public string GenerateRefreshToken()

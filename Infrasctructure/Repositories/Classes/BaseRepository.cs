@@ -2,7 +2,7 @@
 using Infrasctructure.Cache;
 using Infrasctructure.Database;
 using Infrasctructure.Repositories.Interfaces;
-using OpenQA.Selenium;
+ 
 
 namespace Infrasctructure.Repositories.Classes;
 
@@ -34,26 +34,19 @@ public abstract class BaseRepository<TEntity>(ApplicationDbContext dbContext, IC
         return true;
     }
 
-    public async Task<TEntity> GetAsync(int id, bool includeRelated = false)
+    public async Task<TEntity?> GetAsync(int id, bool includeRelated = false)
     {
-    
-        //var cachedEntity = await _cache.GetAsync<TEntity>(id);
-        //if (cachedEntity is not null)
-        //{
-        //    await _cache.RefreshAsync(cachedEntity);
-        //    return cachedEntity;
-        //}
-
-
         var query = _dbContext.Set<TEntity>().AsQueryable();
 
         if (includeRelated)
+        {
             query = IncludeRelated(query);
+        }
 
-        var entity = await query.FirstOrDefaultAsync(e => e.Id == id)
-            ?? throw new NotFoundException(typeof(TEntity).Name);
+        var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
+        if (entity != null)
+            await _cache.SetAsync(entity);
 
-        await _cache.SetAsync(entity);
         return entity;
     }
 

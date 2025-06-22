@@ -15,11 +15,20 @@ Jwt:
 
 #TODO : Implement IMAP
 EmailSettings:
-  Server: smtp.gmail.com
-  Port: 587
-  EnableSsl: true
-  Email: nazarovruslan04@gmail.com
-  Password: zanb axss upsa gvrk
+   Accounts:
+    - Server: smtp.gmail.com
+      Port: 587
+      EnableSsl: true
+      Email: ruslan.nz777@gmail.com
+      Password: iaaz xolz ifsh hghc
+
+
+    - Server: smtp.gmail.com
+      Port: 587
+      EnableSsl: true
+      Email: nazarovruslan04@gmail.com
+      Password: zanb axss upsa gvrk
+
 
 
 Cache: 

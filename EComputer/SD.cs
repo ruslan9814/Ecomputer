@@ -1,4 +1,4 @@
-﻿namespace EComputer;
+﻿namespace Api;
 
 public static class SD
 {

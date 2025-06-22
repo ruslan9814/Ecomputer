@@ -21,7 +21,7 @@ internal sealed class GetProductByIdQueryHandler(IProductRepository productRepos
                 $"Продукт с ID {request.Id} не найден.");
         }
 
-        var product = await _productRepository.GetAsync(request.Id, includeRelated: true);
+        var product = await _productRepository.GetProductByIdAsync(request.Id, includeRelated: true);
 
         var response = new ProductDto(
             product.Id,
@@ -30,7 +30,11 @@ internal sealed class GetProductByIdQueryHandler(IProductRepository productRepos
             product.Price,
             product.IsInStock,
             product.CreatedDate,
-            product.CategoryId
+            product.Quantity,
+            product.CategoryId,
+            product.Category?.Name ?? string.Empty,
+            product.Rating,
+            product.ImageUrl 
         );
 
         return Result.Success(response);

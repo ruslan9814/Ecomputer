@@ -4,26 +4,25 @@ using Application.CartItems.Queries;
 using Presentation.CartItems.Requests;
 using Microsoft.AspNetCore.Http;
 using MediatR;
-using EComputer;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Presentation.CartItems;
 
-public sealed class CartItemEndPoints : CarterModule
+public sealed class CartItem : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var cartItem = app.MapGroup("api/cart-item");
-            //.RequireAuthorization(policy => policy.RequireRole(SD.Role.UserAndAdmin));
+        var cartItem = app.MapGroup("api/cart-item")
+            .RequireAuthorization(policy => policy.RequireRole(SD.Role.Admin, SD.Role.User));
 
         cartItem.MapPost("/", AddProductInCartItem);
         cartItem.MapPut("/", UpdateQuantity);
-        cartItem.MapDelete("/", RemoveCartItem);
-        cartItem.MapGet("/{Id}", GetCartItem);
-        //cartItem.MapGet("/{cartId}", FindProductAsync);
-        //cartItem.MapGet("/", GetProductAsync);
+        cartItem.MapDelete("/{Id}", RemoveCartItem);
+        cartItem.MapGet("/{id}", GetCartItem);
     }
 
-    public async Task<IResult> GetCartItem(int id, ISender sender)
+    private static async Task<IResult> GetCartItem(int id, ISender sender)
     {
         var response = await sender.Send(new GetByIdCartItemQuery(id));
 
@@ -31,7 +30,8 @@ public sealed class CartItemEndPoints : CarterModule
             Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
-    public async Task<IResult> AddProductInCartItem([FromBody] AddCartItemRequest request, ISender sender)
+    private static async Task<IResult> AddProductInCartItem([FromBody] AddCartItemRequest request, 
+        ISender sender)
     {
         var response = await sender.Send(new AddCartItemCommand(request.CartId,
             request.ProductId, request.Quantity));
@@ -40,17 +40,19 @@ public sealed class CartItemEndPoints : CarterModule
             Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
-    public async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest request, ISender sender)
+    private static async Task<IResult> UpdateQuantity([FromBody] UpdateCartItemRequest request, 
+        ISender sender)
     {
-        var response = await sender.Send(new UpdateQuantityCartItemCommand(request.Id, request.Quantity));
+        var response = await sender.Send(new UpdateQuantityCartItemCommand(request.Id, 
+            request.Quantity));
 
         return response.IsFailure ?
             Results.BadRequest(response.Error) : Results.Ok(response);
     }
 
-    public async Task<IResult> RemoveCartItem([FromBody] RemoveCartItemRequest request, ISender sender)
+    private static async Task<IResult> RemoveCartItem(int id, ISender sender)
     {
-        var response = await sender.Send(new RemoveCartItemCommand(request.CartItemId));
+        var response = await sender.Send(new RemoveCartItemCommand(id));
 
         return response.IsFailure ?
              Results.BadRequest(response.Error) : Results.Ok(response);

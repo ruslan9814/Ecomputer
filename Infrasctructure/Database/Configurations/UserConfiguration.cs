@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Domain.Users;
 using Domain.Carts;
+using Domain.Favorites;
 
 namespace Infrasctructure.Database.Configurations;
 
@@ -28,9 +29,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
                .WithOne(cart => cart.User)
                .HasForeignKey<Cart>(cart => cart.UserId);
 
-        builder.HasMany(user => user.Favorites)
-               .WithOne(favorite => favorite.User)
-               .HasForeignKey(favorite => favorite.UserId_FK)
-               .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(user => user.Favorite)
+                .WithOne(favorite => favorite.User)
+                .HasForeignKey<Favorite>(favorite => favorite.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
     }
 }

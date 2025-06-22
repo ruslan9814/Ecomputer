@@ -1,12 +1,12 @@
-﻿using Domain.Categories;
+﻿
 
-namespace Application.Endpoints.Products.Requests;
+namespace Presentation.Products.Requests;
 
 public sealed record GetFilterProductRequest
 (
     string? Name,
-    decimal MinPrice,
-    decimal MaxPrice,
-    bool IsInStock,
-    Category? Category 
+    decimal? MinPrice,
+    decimal? MaxPrice,
+    bool? IsInStock,
+    int? CategoryId
 );

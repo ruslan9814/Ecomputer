@@ -1,4 +1,4 @@
-﻿namespace EComputer;
+﻿namespace Presentation;
 
 public static class SD
 {

@@ -8,4 +8,5 @@ public interface ICartRepository : IBaseRepository<Cart>
     Task<bool> IsExistByUserIdAsync(int id);
     Task<Cart> GetWithItemsAsync(int id);
     Task RemoveItemsAsync(int id);
+    Task<Cart?> GetWithItemsAndProductsAsync(int cartId);
 }

@@ -1,40 +1,39 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Infrastrcture.Email;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 
-namespace Infrastrcture.Email;
+namespace Infrasctructure.Email;
 
-public class EmailSenderService(IOptions<EmailSettingsService> emailSettings) 
+public class EmailSenderService(IOptions<EmailSettingsService> emailSettings)
     : IEmailSenderService
 {
-    private readonly EmailSettingsService _emailSettings = emailSettings.Value;
+    private readonly List<EmailAccount> _accounts = emailSettings.Value.Accounts;
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        ArgumentNullException.ThrowIfNull(email, nameof(email));
-        ArgumentNullException.ThrowIfNull(subject, nameof(email));
-        ArgumentNullException.ThrowIfNull(htmlMessage, nameof(email));
+        ArgumentNullException.ThrowIfNull(email);
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(htmlMessage);
 
-        await Execute(email, subject, htmlMessage);
-    }
+        var account = _accounts[0]; 
 
-    private async Task Execute(string email, string subject, string htmlMessage)
-    {
-        var message = new MailMessage()
+        var message = new MailMessage
         {
-            From = new MailAddress(_emailSettings.Email)
+            From = new MailAddress(account.Email),
+            Subject = subject,
+            Body = htmlMessage,
+            IsBodyHtml = true
         };
-        message.To.Add(email);
-        message.Subject = subject;   
-        message.Body = htmlMessage;
-        message.IsBodyHtml = true;
 
-        using var smtp = new SmtpClient(_emailSettings.Server, _emailSettings.Port);
-        smtp.EnableSsl = _emailSettings.EnableSsl;
-        smtp.Credentials = new NetworkCredential(_emailSettings.Email, _emailSettings.Password);
+        message.To.Add(email);
+
+        using var smtp = new SmtpClient(account.Server, account.Port)
+        {
+            EnableSsl = account.EnableSsl,
+            Credentials = new NetworkCredential(account.Email, account.Password)
+        };
 
         await smtp.SendMailAsync(message);
     }
-
-
 }

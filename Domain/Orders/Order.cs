@@ -1,34 +1,39 @@
-﻿using Domain.Users;
+﻿
+using Domain.Users;
 
 namespace Domain.Orders;
-
 public class Order : EntityBase
 {
-    public ICollection<OrderItem> Items { get; set; } = [];
-    public decimal TotalPrice => Items.Sum(x => x.Product.Price * x.Quantity);
-    public DateTime CreatedDate { get; set; }
-    public int OrderStatusId { get; set; }
-    public OrderStatus Status { get; set; }
-    public int UserId { get; set; }
-    public User User { get; set; }
+    public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 
-#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
-    private Order() { }
-#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
-    public Order(int userId, User user, ICollection<OrderItem> orderItems, DateTime createdDate, OrderStatus status)
+    public decimal TotalPrice => Items.Sum(x => x.Product.Price * x.Quantity);
+
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    public int OrderStatusId { get; set; }
+
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
+    public int UserId { get; set; }
+
+    public User? User { get; set; } 
+
+    private Order()
     {
-        UserId = userId;
-        User = user;
-        Items = orderItems;
-        CreatedDate = createdDate;
-        Status = status;
     }
-    public Order(int userId, User user, DateTime createdDate, OrderStatus status)
+
+    public Order(int id) : base(id)
+    {
+    }
+
+    public Order(int userId, User user, ICollection<OrderItem>? orderItems = null, 
+        DateTime? createdDate = null, OrderStatus? status = null)
     {
         UserId = userId;
         User = user;
-        CreatedDate = createdDate;
-        Status = status;
+        Items = orderItems ?? new List<OrderItem>();
+        CreatedDate = createdDate ?? DateTime.UtcNow;
+        Status = status ?? OrderStatus.Pending;
     }
 
     public void UpdateStatus()
@@ -37,21 +42,30 @@ public class Order : EntityBase
         {
             Status = OrderStatus.Processing;
         }
-
-        if (Status == OrderStatus.Processing)
+        else if (Status == OrderStatus.Processing)
         {
             var totalItems = Items.Count;
             var processedItems = Items.Count(x => x.Quantity > 0);
 
-            if (totalItems == processedItems)
+            if (totalItems == 0)
+            {
+                Status = OrderStatus.Cancelled;
+            }
+            else if (totalItems == processedItems)
             {
                 Status = OrderStatus.Delivered;
             }
         }
+    }
 
-        if (Status == OrderStatus.Processing && Items.Count == 0)
+    public Result ChangeStatus(OrderStatus newStatus)
+    {
+        if (Status == OrderStatus.Cancelled || Status == OrderStatus.Delivered)
         {
-            Status = OrderStatus.Cancelled;
+            return Result.Failure("Статус не может быть изменён после завершения заказа.");
         }
+
+        Status = newStatus;
+        return Result.Success();
     }
 }

@@ -1,31 +1,56 @@
-﻿using Infrasctructure.Repositories.Interfaces;
+﻿using Domain.Users;
+using Infrasctructure.CurrentUser;
+using Infrasctructure.Repositories.Interfaces;
 using Infrasctructure.UnitOfWork;
-
-namespace Application.CartItems.Commands;
 
 public sealed record UpdateQuantityCartItemCommand(int Id, int Quantity) : IRequest<Result>;
 
 internal sealed class UpdateQuantityCartItemCommandHandler(
     ICartItemRepository cartItemRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateQuantityCartItemCommand, Result>
+    IProductRepository productRepository,
+    ICartRepository cartRepository,
+    IUnitOfWork unitOfWork,
+    ICurrentUserService currentUser) : IRequestHandler<UpdateQuantityCartItemCommand, Result>
 {
     private readonly ICartItemRepository _cartItemRepository = cartItemRepository;
+    private readonly IProductRepository _productRepository = productRepository;
+    private readonly ICartRepository _cartRepository = cartRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ICurrentUserService _currentUser = currentUser;
 
-    public async Task<Result> Handle(UpdateQuantityCartItemCommand request, 
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateQuantityCartItemCommand request, CancellationToken cancellationToken)
     {
-        var isExist = await _cartItemRepository.IsExistAsync(request.Id);
+        var userId = _currentUser.UserId;
+        if (userId <= 0)
+        {
+            return Result.Failure("Пользователь не авторизован.");
+        }
 
-        if (!isExist)
+        var cartItem = await _cartItemRepository.GetWithProductAndCartAsync(request.Id, userId, cancellationToken);
+        if (cartItem is null)
         {
             return Result.Failure("Элемент корзины с таким ID не найден.");
         }
 
-        var cartItem = await _cartItemRepository.GetAsync(request.Id);
+        var cart = await _cartRepository.GetAsync(cartItem.CartId);
+        if (cart is null)
+        {
+            return Result.Failure("Корзина, связанная с этим элементом, не найдена.");
+        }
+ 
+        if (cart.UserId != _currentUser.UserId)
+        {
+            return Result.Failure("Доступ запрещён. Элемент не принадлежит вашей корзине.");
+        }
 
-        cartItem.UpdateQuantity(request.Quantity);
+        var result = cartItem.UpdateQuantity(cartItem.ProductId, request.Quantity);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
         await _cartItemRepository.UpdateAsync(cartItem);
+        await _productRepository.UpdateAsync(cartItem.Product);
         await _unitOfWork.Commit();
 
         return Result.Success();

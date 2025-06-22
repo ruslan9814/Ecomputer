@@ -1,5 +1,4 @@
-﻿using Domain.Common;
-using Application.Dtos;
+﻿using Application.Dtos;
 using Infrasctructure.Repositories.Interfaces;
 
 namespace Application.Products.Queries;
@@ -9,7 +8,7 @@ public sealed record GetFilterProductQuery(
     decimal MinPrice,
     decimal MaxPrice,
     bool IsInStock,
-    int CategoryId,//////////////////////////podumat
+    int? CategoryId, 
     int PageNumber = 1,
     int PageSize = 8) : IRequest<Result<ResultPage<ProductDto>>>;
 
@@ -18,8 +17,7 @@ internal sealed class GetFilterProductQueryHandler(IProductRepository productRep
 {
     private readonly IProductRepository _productRepository = productRepository;
 
-    public async Task<Result<ResultPage<ProductDto>>> Handle(GetFilterProductQuery request, 
-        CancellationToken cancellationToken)
+    public async Task<Result<ResultPage<ProductDto>>> Handle(GetFilterProductQuery request, CancellationToken cancellationToken)
     {
         var products = await _productRepository.GetFilteredProductsAsync(
             request.Name,
@@ -33,8 +31,9 @@ internal sealed class GetFilterProductQueryHandler(IProductRepository productRep
             request.Name,
             request.MinPrice,
             request.MaxPrice,
-            request.IsInStock);
-
+            request.IsInStock,
+            request.CategoryId  
+        );
 
         var productsDto = products.Select(p => new ProductDto(
             p.Id,
@@ -43,10 +42,12 @@ internal sealed class GetFilterProductQueryHandler(IProductRepository productRep
             p.Price,
             p.IsInStock,
             p.CreatedDate,
-            p.CategoryId
-        //new CategoryDto(p.Category.Id, p.Category.Name)
+            p.Quantity,
+            p.CategoryId,
+            p.Category?.Name ?? string.Empty,
+            p.Rating,
+            p.ImageUrl  
         )).ToList();
-
 
         var pageResult = new ResultPage<ProductDto>(
             request.PageSize,
@@ -54,7 +55,6 @@ internal sealed class GetFilterProductQueryHandler(IProductRepository productRep
             countProducts,
             productsDto
         );
-
 
         return Result.Success(pageResult);
     }

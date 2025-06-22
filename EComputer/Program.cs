@@ -17,10 +17,12 @@ using Asp.Versioning;
 using Microsoft.OpenApi.Models;
 using Infrasctructure.Email;
 using Infrasctructure.CurrentUser;
+using Infrasctructure.BlobStorage;
+ 
 
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
-
+ 
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>
@@ -52,6 +54,9 @@ builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
 builder.Services.AddTransient<IBlackListService, BlackListService>();
 builder.Services.AddTransient<IProductReviewRepository, ProductReviewRepository>();
 builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
+builder.Services.AddTransient<IBlobService, BlobService>();
+
+
 
 
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(GetOrderCommand).Assembly));
@@ -167,9 +172,8 @@ app.MigrateDbContext<ApplicationDbContext>();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+ 
 app.MapCarter();
-
 
 app.Run();
 

@@ -1,20 +1,19 @@
 ﻿using Domain.Products;
 
 namespace Domain.Orders;
-
 public class OrderItem : EntityBase
 {
     public int ProductId { get; set; }
-    public Product Product { get; set; }
+    public Product? Product { get; set; }
     public int OrderId { get; set; }
-    public Order Order { get; set; }
+    public Order? Order { get; set; }
     public int Quantity { get; set; }
     public decimal Price { get; set; }
 
-#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
-    private OrderItem() { }
-#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
-    public OrderItem(int productId, Product product, int orderId,  Order order, int quantity, decimal price)
+    public OrderItem(int id) : base(id) { } 
+
+    public OrderItem(int productId, Product product, int orderId, 
+        Order order, int quantity, decimal price) : base(0)
     {
         ProductId = productId;
         Product = product;
@@ -23,6 +22,7 @@ public class OrderItem : EntityBase
         Quantity = quantity;
         Price = price;
     }
+
 
     public Result AddProductToOrderItem(int orderId, int productId, int quantity, decimal price)
     {
@@ -45,6 +45,7 @@ public class OrderItem : EntityBase
         {
             return Result.Failure("Цена продукта должна быть больше нуля.");
         }
+
         var orderItem = Order.Items.FirstOrDefault(x => x.ProductId == productId);
         if (orderItem is not null)
         {
@@ -66,12 +67,13 @@ public class OrderItem : EntityBase
         {
             return Result.Failure("Заказ не найден.");
         }
+
         if (Product is null || ProductId != productId)
         {
             return Result.Failure("Продукт не найден.");
         }
-        var orderItem = Order.Items.FirstOrDefault(x => x.ProductId == productId);
 
+        var orderItem = Order.Items.FirstOrDefault(x => x.ProductId == productId);
         if (orderItem is null)
         {
             return Result.Failure("Продукт не найден в заказе.");

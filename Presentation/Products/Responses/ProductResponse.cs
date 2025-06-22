@@ -1,6 +1,6 @@
-﻿using Domain.Categories;
+﻿
 
-namespace Application.Endpoints.Products.Responses;
+namespace Presentation.Products.Responses;
 
 public sealed record ProductResponse(
     int Id,
@@ -10,4 +10,6 @@ public sealed record ProductResponse(
     int Quantity,
     bool IsInStock,
     DateTime CreatedDate,
-    Category Category);
+    int CategoryId,
+    string CategoryName);
+

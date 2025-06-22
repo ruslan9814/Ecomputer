@@ -14,7 +14,8 @@ public class User : EntityBase
     public bool IsEmailConfirmed { get; set; }
     public bool IsBlocked { get; set; }
     public string? ConfirmationToken { get; set; }
-    public string RefreshToken { get; set; } 
+    public string RefreshToken { get; set; }
+    public string? ImageUrl { get; set; }
     public Cart? Cart { get; set; }
     public Favorite? Favorite { get; set; }
     public Role Role { get; set; }
@@ -28,7 +29,7 @@ public class User : EntityBase
 #pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
 
     public User(string name, string email, string hashedPassword, string address,
-     bool isEmailConfirmed, string? confirmationToken, Role role) : base(0)
+     bool isEmailConfirmed, string? confirmationToken, Role role, string? imageUrl) : base(0)
     {
         Name = name;
         Email = email;
@@ -42,6 +43,7 @@ public class User : EntityBase
         ProductReviews = new List<ProductReview>();
         Cart = new Cart(this);
         Favorite = new Favorite(this);
+        ImageUrl = imageUrl;
     }
 
 

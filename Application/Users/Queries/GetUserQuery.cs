@@ -24,7 +24,8 @@ internal sealed class GetUserQueryHandler(IUserRepository userRepository)
             user.Id,
             user.Name,
             user.Email,
-            user.Address
+            user.Address,
+            user.ImageUrl
         );
 
         return Result.Success(response);

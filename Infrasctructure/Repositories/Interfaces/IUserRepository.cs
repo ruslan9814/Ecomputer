@@ -65,4 +65,7 @@ public interface IUserRepository : IBaseRepository<User>
         CancellationToken cancellationToken = default);
 
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<User>> GetAll(bool includeRelated = false);
+    Task UpdateImageUrlAsync(int userId, string imageUrl, CancellationToken cancellationToken = default);
 }

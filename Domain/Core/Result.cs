@@ -1,4 +1,5 @@
-﻿namespace Domain.Core;
+﻿
+namespace Domain.Core;
 
 public class Result
 {

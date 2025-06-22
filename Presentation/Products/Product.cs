@@ -4,43 +4,47 @@ using Microsoft.AspNetCore.Http;
 using MediatR;
 using Application.Products.Queries;
 using Application.Products.Commands;
+using Presentation.Products.Requests;
 
 namespace Presentation.Products;
 
 ////realizovat repositoriy cart and cartItem METODI DLA KORZINI ADD DELETE UPDATE NAPISAT V CLASSE cartItemRepository,
 //// TAKJE DOVAVIT cartItemEndPoints i v ney vizvat metodi cerez ICartItemRepository
 
-public sealed class ProductEndPoints : CarterModule
+public sealed class Product : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        var product = app.MapGroup("api/product");
-            //.RequireAuthorization(policy => policy.RequireRole("User"));
-        product.MapGet("{productId}/", GetProduct);
+        var product = app.MapGroup("api/product")
+            .RequireAuthorization(policy => policy.RequireRole(SD.Role.Admin, SD.Role.User));
+        product.MapGet("{id}/", GetProduct);
         product.MapGet("/", GetFilterProducts);
-        product.MapPost("/", AddProduct);
-        product.MapDelete("{productId}/", RemoveProduct);
-        product.MapPut("{productId}/", UpdateProduct);
+        product.MapPost("/", AddProduct).DisableAntiforgery();
+        product.MapDelete("/", RemoveProduct);
+        product.MapPut("/", UpdateProduct).DisableAntiforgery();
+        product.MapGet("all/", GetAllProducts);
     }
 
-    public async Task<IResult> GetFilterProducts(string name, decimal minPrice, 
+    private static async Task<IResult> GetFilterProducts(string name, decimal minPrice, 
         decimal maxPrice, bool isInStock, int categoryId, ISender sender)
     {
-        var response = await sender.Send(new GetFilterProductQuery(name, minPrice, maxPrice, isInStock, categoryId));
+        var response = await sender.Send(new GetFilterProductQuery(name, minPrice, maxPrice, 
+            isInStock, categoryId));
         return response.IsFailure
             ? Results.BadRequest(response.Error)
             : Results.Ok(response);
     }
 
-    public async Task<IResult> GetProduct(int Id, ISender sender)
+    private static async Task<IResult> GetProduct(int id, ISender sender)
     {
-        var response = await sender.Send(new GetProductByIdQuery(Id));
+        var response = await sender.Send(new GetProductByIdQuery(id));
         return response.IsFailure
             ? Results.BadRequest(response.Error)
             : Results.Ok(response);
     }
 
-    public async Task<IResult> AddProduct([FromBody] AddProductRequest request, ISender sender)
+    private static async Task<IResult> AddProduct([FromForm] AddProductRequest request,
+        ISender sender)
     {
         var response = await sender.Send(new AddProductCommand(
             request.Name, 
@@ -49,14 +53,16 @@ public sealed class ProductEndPoints : CarterModule
             request.IsInStock, 
             DateTime.UtcNow, 
             request.CategoryId, 
-            request.Description));
+            request.Description,
+            request.ImageFile));
 
         return response.IsFailure ?
             Results.BadRequest(response.Error) 
             : Results.Ok(response);
     }
 
-    public async Task<IResult> RemoveProduct([FromBody] DeleteProductRequest request, [FromServices] ISender sender)
+    private static async Task<IResult> RemoveProduct([FromBody] DeleteProductRequest request, 
+        [FromServices] ISender sender)
     {
          var response = await sender.Send(new DeleteProductCommand(request.Id));
         return response.IsFailure
@@ -64,11 +70,20 @@ public sealed class ProductEndPoints : CarterModule
             : Results.Ok(response);
     }
 
-    public async Task<IResult> UpdateProduct([FromBody] UpdateProductRequest request, [FromServices] ISender sender)
+    private static async Task<IResult> UpdateProduct([FromForm] UpdateProductRequest request, 
+        [FromServices] ISender sender)
     {
        var response = await sender.Send(new UpdateProductCommand(request.Id, request.Name,
             request.Description, request.Price, request.Quantity, request.IsInStock,
-            request.CateqoryId));
+            request.CategoryId, request.ImageFile));
+        return response.IsFailure
+            ? Results.BadRequest(response.Error)
+            : Results.Ok(response);
+    }
+
+    private static async Task<IResult> GetAllProducts(ISender sender)
+    {
+        var response = await sender.Send(new GetAllProductsQuery());
         return response.IsFailure
             ? Results.BadRequest(response.Error)
             : Results.Ok(response);

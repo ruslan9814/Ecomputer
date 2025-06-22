@@ -9,16 +9,12 @@ namespace Infrasctructure.Repositories.Classes;
 public class CartRepository(ApplicationDbContext dbContext, ICacheEntityService cache) :
     BaseRepository<Cart>(dbContext, cache), ICartRepository
 {
-    public async Task<Cart> GetAsync(int cartId) =>
-        await _dbContext.Carts
-            .Include(c => c.Items)
-            .ThenInclude(p => p.Product)
-            .FirstAsync(c => c.Id == cartId);
 
     public async Task<Cart?> GetByUserIdAsync(int id) =>
         await _dbContext.Carts
             .Include(c => c.Items)
             .ThenInclude(p => p.Product)
+            .ThenInclude(p => p.Category)
             .FirstOrDefaultAsync(c => c.UserId == id);
 
     public async Task<bool> IsExistByUserIdAsync(int id) =>
@@ -33,5 +29,15 @@ public class CartRepository(ApplicationDbContext dbContext, ICacheEntityService 
         await _dbContext.CartItems
             .Where(ci => ci.CartId == cartId)
             .ExecuteDeleteAsync();
+
+    public async Task<Cart?> GetWithItemsAndProductsAsync(int cartId)
+    {
+        return await _dbContext.Carts
+            .Include(c => c.Items)
+            .ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(c => c.Id == cartId);
+
+
+    }
 
 }

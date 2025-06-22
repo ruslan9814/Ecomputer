@@ -10,31 +10,49 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     public void Configure(EntityTypeBuilder<Product> builder)
     {
         builder.ToTable("Products");
+        builder.HasKey(p => p.Id);
 
-        builder.HasKey(product => product.Id);
-
-        builder.Property(product => product.Name)
+        builder.Property(p => p.Name)
                .IsRequired()
                .HasMaxLength(200);
 
-        builder.Property(product => product.Price)
-               .IsRequired();
+        builder.Property(p => p.Price)
+               .IsRequired()
+               .HasColumnType("decimal(18,2)");
 
-        builder.Property(product => product.Description)
+        builder.Property(p => p.Description)
                .HasMaxLength(1024);
 
+        builder.Property(p => p.IsInStock)
+               .IsRequired();
+
+        builder.Property(p => p.Quantity)
+               .IsRequired();
+
+        builder.Property(p => p.CreatedDate)
+               .IsRequired()
+               .HasDefaultValueSql("GETDATE()");
+
+        builder.Property(p => p.Rating)
+               .IsRequired()
+               .HasDefaultValue(0);
+
+        builder.HasIndex(p => p.Name);
+        builder.HasIndex(p => p.CategoryId);
+
         builder.HasMany<CartItem>()
-               .WithOne(cartItem => cartItem.Product)
-               .HasForeignKey(cartItem => cartItem.ProductId)
+               .WithOne(c => c.Product)
+               .HasForeignKey(c => c.ProductId)
                .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(product => product.CreatedDate)
-        .IsRequired();
-
         builder.HasOne(p => p.Category)
-                         .WithMany(c => c.Products)  
-                         .HasForeignKey(p => p.CategoryId)
-                         .IsRequired()
-                         .OnDelete(DeleteBehavior.Restrict);
+               .WithMany(c => c.Products)
+               .HasForeignKey(p => p.CategoryId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(p => p.FavoriteProducts)
+       .WithOne(fp => fp.Product)
+       .HasForeignKey(fp => fp.ProductId);
     }
 }
