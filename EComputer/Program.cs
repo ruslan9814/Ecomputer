@@ -64,7 +64,8 @@ builder.Services.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(GetOrderC
 builder.Configuration.AddYamlFile("appsettings.yml", optional: true, reloadOnChange: true);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRE_CONNECTION_STRING")));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")));
+
 
 builder.Services.AddStackExchangeRedisCache(x =>
     x.Configuration = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"));
