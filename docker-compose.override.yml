@@ -1,0 +1,29 @@
+
+services:
+  Api:
+    ports:
+      - "5000:5000" 
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5000
+      # - ASPNETCORE_HTTPS_PORTS=5001
+      - REDIS_CONNECTION_STRING=redis:6379
+      - POSTGRES_CONNECTION_STRING=Host=database;Database=mydatabase;Username=postgres;Password=${POSTGRES_PASSWORD};TrustServerCertificate=true;
+      - AzureBlobStorage__ConnectionString=${AzureBlobStorage__ConnectionString}
+      - AzureBlobStorage__ContainerName=images
+    restart: always
+
+  redis:
+    ports:
+      - "6379:6379"  
+    restart: always
+
+  database:
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=mydatabase  
+      - POSTGRES_USER=postgres         
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
