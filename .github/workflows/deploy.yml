@@ -1,12 +1,13 @@
-name: Deploy to Docker Hub and Server
- 
- on:
+name: Deploy to Docker Hub and Azure VM
+
+on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,21 +30,28 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/ecomputer:latest
 
-      - name: Show images in Docker Hub
+      - name: Show pushed image info
         run: |
           echo "Image pushed: ${{ secrets.DOCKERHUB_USERNAME }}/ecomputer:latest"
           echo "Check your Docker Hub repository for the image."
 
-      - name: Deploy to remote server via SSH
-        uses: appleboy/ssh-action@v1.0.3
+  deploy-to-azure-vm:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          port: ${{ secrets.AZURE_VM_SSH_PORT }}  
           script: |
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ecomputer:latest
             docker stop ecomputer || true
             docker rm ecomputer || true
-            docker run -d --name ecomputer -p 5000:5000 -p 5001:5001 ${{ secrets.DOCKERHUB_USERNAME }}/ecomputer:latest 
+            docker run -d --name ecomputer -p 5000:5000 -p 5001:5001 ${{ secrets.DOCKERHUB_USERNAME }}/ecomputer:latest
