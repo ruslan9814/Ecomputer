@@ -1,6 +1,6 @@
 name: Deploy to Docker Hub and Server
-
-on:
+ 
+ on:
   push:
     branches:
       - main
