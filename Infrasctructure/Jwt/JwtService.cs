@@ -42,15 +42,16 @@ public class JwtService(IOptions<JwtOptions> options, IDistributedCache database
     }
 
     private static Claim[] CreateClaims(int userId, string username, string role, string email) =>
-        [
-        new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+     [
+         new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+        new Claim(ClaimTypes.NameIdentifier, userId.ToString()), 
         new Claim(JwtRegisteredClaimNames.UniqueName, username),
         new Claim(JwtRegisteredClaimNames.Email, email),
         new Claim(ClaimTypes.Role, role),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(JwtRegisteredClaimNames.Iat, 
+        new Claim(JwtRegisteredClaimNames.Iat,
             DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
-        ];
+     ];
 
     public string GenerateRefreshToken()
     {

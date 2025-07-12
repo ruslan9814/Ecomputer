@@ -1,11 +1,13 @@
 ﻿ 
 namespace Application.Dtos;
 
-public sealed record OrderStatisticsDto
-(
-    int TotalOrders,
-    int UniqueUsers,
-    decimal TotalRevenue,
-    decimal AverageCheck
-);
-
+public class OrderStatisticsDto
+{
+    public int TotalOrders { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public decimal AverageOrderValue { get; set; }
+    public int PendingOrders { get; set; }
+    public int CompletedOrders { get; set; }
+    public int UniqueUsers { get; set; }
+    public decimal AverageCheck { get; set; }
+}

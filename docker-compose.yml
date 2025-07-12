@@ -25,7 +25,7 @@ services:
     environment:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
 # volumes:
 #     ecomputer_image-storage: {}

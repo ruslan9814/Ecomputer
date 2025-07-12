@@ -56,12 +56,6 @@ internal sealed class AddOrderItemCommandHandler(
                 return Result.Failure($"Продукт с ID {cartItem.ProductId} не найден.");
             }
 
-            var decreaseResult = product.DecreaseQuantity(cartItem.Quantity);
-            if (decreaseResult.IsFailure)
-            {
-                return Result.Failure($"Недостаточно товара: {product.Name}. Осталось: {product.Quantity}");
-            }
-
             var orderItem = new OrderItem(
                 product.Id,
                 product,

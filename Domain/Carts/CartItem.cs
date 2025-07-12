@@ -3,17 +3,26 @@ using Domain.Products;
 
 public class CartItem : EntityBase
 {
-    public int Quantity { get; set; }
-    public int ProductId { get; set; }
-    public Product? Product { get; set; }
-    public int CartId { get; set; }
-    public Cart? Cart { get; set; }
+    public int Quantity { get; private set; }
+    public int ProductId { get; private set; }
+    public Product Product { get; private set; } = null!;
+    public int CartId { get; private set; }
+    public Cart Cart { get; private set; } = null!;
 
     public CartItem() { }
 
-    public CartItem(int id, int quantity, int productId, Product product, int cartId, Cart cart) 
+    public CartItem(int id, int quantity, int productId, Product product, int cartId, Cart cart)
         : base(id)
     {
+        if (quantity < 0)
+            throw new ArgumentException("Количество не может быть отрицательным", nameof(quantity));
+        if (product == null)
+            throw new ArgumentNullException(nameof(product), "Продукт не может быть null");
+        if (product.Id != productId)
+            throw new ArgumentException("ProductId не совпадает с идентификатором объекта Product.");
+        if (cart == null)
+            throw new ArgumentNullException(nameof(cart), "Корзина не может быть null");
+
         Quantity = quantity;
         ProductId = productId;
         Product = product;
@@ -29,27 +38,28 @@ public class CartItem : EntityBase
         if (productId <= 0)
             return Result.Failure("Неверный идентификатор товара.");
 
-        if (Product is null || Product.Id != productId)
-            return Result.Failure("Товар не найден.");
+        if (Product == null || Product.Id != productId)
+            return Result.Failure("Товар не найден или не соответствует идентификатору.");
 
         if (newQuantity == Quantity)
             return Result.Success();
 
         if (newQuantity > Quantity)
         {
-            int quantityToIncrease = newQuantity - Quantity;
+            int quantityToAdd = newQuantity - Quantity;
 
-            if (Product.Quantity < quantityToIncrease)
+            if (Product.Quantity < quantityToAdd)
                 return Result.Failure($"Недостаточно товара на складе. Доступно: {Product.Quantity}");
 
-            var decreaseResult = Product.DecreaseQuantity(quantityToIncrease);
+            var decreaseResult = Product.DecreaseQuantity(quantityToAdd);
             if (decreaseResult.IsFailure)
                 return decreaseResult;
         }
         else
         {
-            int quantityToDecrease = Quantity - newQuantity;
-            var increaseResult = Product.IncreaseQuantity(quantityToDecrease);
+            int quantityToReturn = Quantity - newQuantity;
+
+            var increaseResult = Product.IncreaseQuantity(quantityToReturn);
             if (increaseResult.IsFailure)
                 return increaseResult;
         }
@@ -63,8 +73,11 @@ public class CartItem : EntityBase
         if (quantity <= 0)
             return Result.Failure("Количество для уменьшения должно быть больше нуля.");
 
-        if (Quantity - quantity < 0)
-            return Result.Failure("Не хватает количества товара в корзине.");
+        if (Product == null)
+            return Result.Failure("Продукт не задан.");
+
+        if (Quantity < quantity)
+            return Result.Failure("Недостаточное количество товара в корзине для уменьшения.");
 
         Quantity -= quantity;
 
@@ -80,8 +93,11 @@ public class CartItem : EntityBase
         if (quantity <= 0)
             return Result.Failure("Количество для увеличения должно быть больше нуля.");
 
+        if (Product == null)
+            return Result.Failure("Продукт не задан.");
+
         if (Product.Quantity < quantity)
-            return Result.Failure("Недостаточно товара на складе для увеличения количества.");
+            return Result.Failure($"Недостаточно товара на складе. Доступно: {Product.Quantity}");
 
         var decreaseResult = Product.DecreaseQuantity(quantity);
         if (decreaseResult.IsFailure)

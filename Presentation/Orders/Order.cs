@@ -1,9 +1,11 @@
 ﻿using Application.OrderItems.Command;
 using Application.Orders.Queries;
 using Domain.Orders;
+using Infrasctructure.CurrentUser;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Presentation.Orders.Requests;
+using System.Security.Claims;
 
 namespace Presentation.Orders;
 
@@ -35,14 +37,26 @@ public sealed class Order : CarterModule
             : Results.Ok("Статус заказа успешно обновлён.");
     }
 
-    private static async Task<IResult> GetHistoryOrder(int userId, ISender sender)
+    private static async Task<IResult> GetHistoryOrder(
+     ISender sender,
+     ICurrentUserService currentUserService,
+     HttpContext httpContext)   
     {
-      
-        var response = await sender.Send(new GetOrderHistoryQuery(userId));
+        int userId = currentUserService.UserId;
+        var user = httpContext.User;
+
+        bool isAdmin = user.IsInRole(SD.Role.Admin);
+
+        int? queryUserId = isAdmin ? null : userId;
+
+        var response = await sender.Send(new GetOrderHistoryQuery(queryUserId));
+
         return response.IsFailure
             ? Results.BadRequest(response.Error)
             : Results.Ok(response);
     }
+
+
 
     private static async Task<IResult> GetTopProduct(ISender sender)
     {

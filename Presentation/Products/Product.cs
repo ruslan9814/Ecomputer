@@ -20,9 +20,36 @@ public sealed class Product : CarterModule
         product.MapGet("{id}/", GetProduct);
         product.MapGet("/", GetFilterProducts);
         product.MapPost("/", AddProduct).DisableAntiforgery();
-        product.MapDelete("/", RemoveProduct);
-        product.MapPut("/", UpdateProduct).DisableAntiforgery();
+        product.MapDelete("/{id}", RemoveProduct); 
+        product.MapPut("/{id}", UpdateProduct).DisableAntiforgery();
         product.MapGet("all/", GetAllProducts);
+
+        app.MapGet("api/image-proxy", async (HttpContext context, IHttpClientFactory httpClientFactory) =>
+        {
+            var url = context.Request.Query["url"].ToString();
+
+            if (string.IsNullOrWhiteSpace(url))
+                return Results.BadRequest("Missing image URL");
+
+            try
+            {
+                var client = httpClientFactory.CreateClient();
+                var response = await client.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                    return Results.StatusCode((int)response.StatusCode);
+
+                var contentType = response.Content.Headers.ContentType?.ToString() ?? "image/jpeg";
+                var imageBytes = await response.Content.ReadAsByteArrayAsync();
+
+                return Results.File(imageBytes, contentType);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ImageProxy] Error: {ex.Message}");
+                return Results.Problem("Internal server error");
+            }
+        });
     }
 
     private static async Task<IResult> GetFilterProducts(string name, decimal minPrice, 

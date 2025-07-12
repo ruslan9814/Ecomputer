@@ -2,12 +2,21 @@
 
 namespace Presentation.Products.Requests;
 
-public sealed record UpdateProductRequest(
-    int Id,
-    string Name,
-    decimal Price,
-    string Description,
-    int Quantity,
-    bool IsInStock,
-    int CategoryId,
-    IFormFile ImageFile);
+public class UpdateProductRequest
+{
+    public int Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public decimal Price { get; set; }
+
+    public string Description { get; set; } = string.Empty;
+
+    public int Quantity { get; set; }
+
+    public bool IsInStock { get; set; }
+
+    public int CategoryId { get; set; }
+
+    public IFormFile? ImageFile { get; set; }
+}

@@ -58,12 +58,15 @@ internal sealed class AddCartItemCommandHandler(
             return Result.Failure($"Недостаточно товара на складе. Доступно: {product.Quantity}");
         }
 
-        var cartItem = new CartItem
-        {
-            CartId = request.CartId,
-            ProductId = request.ProductId,
-            Quantity = request.Quantity
-        };
+        var cartItem = new CartItem(
+            id: 0,  
+            quantity: request.Quantity,
+            productId: product.Id,
+            product: product,
+            cartId: cart.Id,
+            cart: cart
+        );
+
 
         await _cartItemRepository.AddAsync(cartItem);
         await _productRepository.UpdateAsync(product);

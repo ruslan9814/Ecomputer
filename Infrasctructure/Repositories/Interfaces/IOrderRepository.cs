@@ -15,5 +15,8 @@ public interface IOrderRepository : IBaseRepository<Order>
     Task<IEnumerable<Order>> GetAllOrdersAsync();
     Task<IEnumerable<Order>> GetUserOrdersAsync(int userId);
     Task<IEnumerable<object>> GetTopProductsAsync(int topCount = 3);
-    Task<object> GetOrderStatisticsAsync();
+
+    Task<(int TotalOrders, decimal TotalRevenue, int PendingOrders, int CompletedOrders,
+         int UniqueUsers, decimal AverageCheck, decimal AverageOrderValue)
+         > GetOrderStatisticsAsync(string? startDate = null, string? endDate = null);
 }
