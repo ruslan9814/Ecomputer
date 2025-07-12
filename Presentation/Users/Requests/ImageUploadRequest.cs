@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Presentation.Users.Requests;
 
-public sealed record ImageUploadRequest(IFormFile ImageFile);
-
+public class ImageUploadRequest
+{
+    public IFormFile ImageFile { get; set; }
+}

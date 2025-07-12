@@ -17,7 +17,7 @@ public class Category : CarterModule
         categoryService.MapGet("/{id}", GetCategory);
         categoryService.MapGet("/", GetAllCategory);
         categoryService.MapPost("/", AddCategory);
-        categoryService.MapDelete("/", DeleteCategory);
+        categoryService.MapDelete("/{id}", DeleteCategory);
     }
     private static async Task<IResult> AddCategory([FromBody] AddCategoryRequest category,
         ISender sender)

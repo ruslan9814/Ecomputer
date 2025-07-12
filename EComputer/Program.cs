@@ -18,7 +18,7 @@ using Microsoft.OpenApi.Models;
 using Infrasctructure.Email;
 using Infrasctructure.CurrentUser;
 using Infrasctructure.BlobStorage;
- 
+
 
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
@@ -141,6 +141,8 @@ var info = new OpenApiInfo()
     License = license
 };
 
+
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
 {

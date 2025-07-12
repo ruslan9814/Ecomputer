@@ -4,8 +4,7 @@ using Application.CartItems.Queries;
 using Presentation.CartItems.Requests;
 using Microsoft.AspNetCore.Http;
 using MediatR;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
+ 
 
 namespace Presentation.CartItems;
 

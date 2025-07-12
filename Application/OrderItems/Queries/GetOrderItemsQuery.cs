@@ -26,12 +26,14 @@ internal sealed class GetOrderItemsQueryHandler(
         }
 
         var response = orderItems.Select(orderItem => new OrderItemDto(
-            orderItem.ProductId,
-            orderItem.Product?.Name ?? "Неизвестно",
-            orderItem.Product?.Category?.Name ?? "Неизвестно",
-            orderItem.Quantity,
-            orderItem.Price
-        )).ToList();
+               orderItem.Id,          
+               orderItem.OrderId,          
+               orderItem.ProductId,
+               orderItem.Product?.Name ?? "Неизвестно",
+               orderItem.Product?.Category?.Name ?? "Неизвестно",
+               orderItem.Quantity,
+               orderItem.Price
+   )).ToList();
 
         return Result.Success(response);
     }

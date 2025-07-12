@@ -2,6 +2,7 @@
 using Application.Favorite.Quieries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.Favorites.Requests;
 
 
@@ -17,6 +18,7 @@ public sealed class Favorite : CarterModule
         favorite.MapGet("/", GetAllFavorites);
         favorite.MapPost("/", AddFavorite);
         favorite.MapDelete("/{productId}", DeleteFavorite);
+
     }
 
     private static async Task<IResult> GetAllFavorites(HttpContext context,  ISender sender)
@@ -27,7 +29,7 @@ public sealed class Favorite : CarterModule
     }
 
     private static async Task<IResult> AddFavorite(HttpContext httpContext,
-        AddFavoriteRequest request, ISender sender)
+        [FromBody] AddFavoriteRequest request, ISender sender)
     {
 
         var response = await sender.Send(new AddFavoritesCommand(request.ProductId));

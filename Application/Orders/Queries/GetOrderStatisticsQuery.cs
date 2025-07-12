@@ -1,18 +1,35 @@
-﻿using Infrasctructure.Repositories.Interfaces;
+﻿using Application.Dtos;
+using Infrasctructure.Repositories.Interfaces;
 
 
 namespace Application.Orders.Queries;
-public sealed record GetOrderStatisticsQuery() : IRequest<Result<object>>;
+public sealed record GetOrderStatisticsQuery(string? StartDate = null, string? EndDate = null) 
+    : IRequest<Result<OrderStatisticsDto>>;
 
-internal sealed class GetOrderStatisticsQueryHandler(IOrderRepository orderRepository) 
-    : IRequestHandler<GetOrderStatisticsQuery, Result<object>>
+public class GetOrderStatisticsQueryHandler(IOrderRepository orderRepository) 
+    : IRequestHandler<GetOrderStatisticsQuery, Result<OrderStatisticsDto>>
 {
     private readonly IOrderRepository _orderRepository = orderRepository;
 
-    public async Task<Result<object>> Handle(GetOrderStatisticsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<OrderStatisticsDto>> Handle(GetOrderStatisticsQuery request,
+        CancellationToken cancellationToken)
     {
-        var stats = await _orderRepository.GetOrderStatisticsAsync();
-        return Result.Success(stats);
+
+        var (totalOrders, totalRevenue, pendingOrders, completedOrders, uniqueUsers, averageCheck, averageOrderValue)
+            = await _orderRepository.GetOrderStatisticsAsync(request.StartDate, request.EndDate);
+
+        var response = new OrderStatisticsDto
+        {
+            TotalOrders = totalOrders,
+            TotalRevenue = totalRevenue,
+            PendingOrders = pendingOrders,
+            CompletedOrders = completedOrders,
+            UniqueUsers = uniqueUsers,
+            AverageCheck = averageCheck,
+            AverageOrderValue = averageOrderValue
+        };
+
+        return Result.Success(response);
+
     }
 }
-

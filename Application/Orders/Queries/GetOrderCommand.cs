@@ -8,7 +8,6 @@ public sealed record GetOrderCommand(
     int OrderId
 ) : IRequest<Result<OrderDto>>;
 
-
 internal sealed class GetOrderCommandHandler(
     IOrderRepository orderRepository
 ) : IRequestHandler<GetOrderCommand, Result<OrderDto>>
@@ -26,6 +25,8 @@ internal sealed class GetOrderCommandHandler(
         }
 
         var orderItems = order.Items.Select(x => new OrderItemDto(
+            x.Id,
+            x.OrderId,
             x.ProductId,
             x.Product?.Name ?? "Неизвестно",
             x.Product?.Category?.Name ?? "Неизвестно",
@@ -35,9 +36,23 @@ internal sealed class GetOrderCommandHandler(
 
         var totalPrice = orderItems.Sum(item => item.Price * item.Quantity);
 
+        
+        UserDto? userDto = null;
+        if (order.User != null)
+        {
+            userDto = new UserDto(
+                order.User.Id,
+                order.User.Name ?? "Unknown",
+                order.User.Email ?? "",
+                order.User.Address ?? "",
+                order.User.ImageUrl
+            );
+        }
+
         var response = new OrderDto(
             order.Id,
             order.UserId,
+            userDto, 
             order.CreatedDate,
             order.Status,
             orderItems,
@@ -46,7 +61,4 @@ internal sealed class GetOrderCommandHandler(
 
         return Result.Success(response);
     }
-
 }
-
-

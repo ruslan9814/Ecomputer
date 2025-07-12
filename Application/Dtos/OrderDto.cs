@@ -1,13 +1,13 @@
-﻿using Domain.Orders;
+﻿using Application.Dtos;
+using Domain.Orders;
 
 namespace Application.Dtos;
-
-public sealed record OrderDto(
-    int OrderId,
+public record OrderDto(
+    int Id,
     int UserId,
+    UserDto? User,  
     DateTime CreatedDate,
     OrderStatus Status,
-    IEnumerable<OrderItemDto> OrderItems,
-    decimal TotalPrice
+    List<OrderItemDto> Items,
+    decimal TotalAmount
 );
-

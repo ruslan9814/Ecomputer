@@ -1,7 +1,6 @@
 ﻿using Application.Users.Commands;
 using Application.Users.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Users.Requests;
@@ -18,8 +17,8 @@ public sealed class User : CarterModule
         user.MapGet("/{Id}", GetUser);
         user.MapPost("/register", RegisterUser);
         user.MapPost("/login", LoginUser);
-        user.MapPut("/", UpdateUsers);  
-        user.MapDelete("/", RemoveUsers);  
+        user.MapPut("/{id}", UpdateUsers);  
+        user.MapDelete("/{id}", RemoveUsers);  
         user.MapGet("/confirm-email/{token}", ConfirmEmail);
         user.MapPost("/logout", Logout);
         user.MapPost("/refresh-token", UpdateRefreshToken);  
@@ -27,6 +26,33 @@ public sealed class User : CarterModule
         user.MapPost("/upload-image", UploadImage)
         .DisableAntiforgery()
         .RequireAuthorization();
+
+        app.MapGet("/image-proxy", async (HttpContext context, IHttpClientFactory httpClientFactory) =>
+        {
+            var url = context.Request.Query["url"].ToString();
+
+            if (string.IsNullOrWhiteSpace(url))
+                return Results.BadRequest("Missing image URL");
+
+            try
+            {
+                var client = httpClientFactory.CreateClient();
+                var response = await client.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                    return Results.StatusCode((int)response.StatusCode);
+
+                var contentType = response.Content.Headers.ContentType?.ToString() ?? "image/jpeg";
+                var imageBytes = await response.Content.ReadAsByteArrayAsync();
+
+                return Results.File(imageBytes, contentType);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ImageProxy] Error: {ex.Message}");
+                return Results.Problem("Internal server error");
+            }
+        });
     }
 
     private static async Task<IResult> ConfirmEmail([FromRoute] string token,
@@ -116,7 +142,7 @@ public sealed class User : CarterModule
 
     private static async Task<IResult> UploadImage([FromForm] ImageUploadRequest request, ISender sender)
     {
-        if (request.ImageFile == null || request.ImageFile.Length == 0)
+        if (request.ImageFile is null || request.ImageFile.Length == 0)
         {
             return Results.BadRequest("Файл изображения не предоставлен.");
         }
@@ -126,4 +152,6 @@ public sealed class User : CarterModule
             ? Results.BadRequest(response.Error)
             : Results.Ok(response.Value);
     }
+
+
 }
