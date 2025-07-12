@@ -10,13 +10,13 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Копируем проект EComputer/Api.csproj в текущую директорию
-COPY ["EComputer/Api.csproj", "EComputer/"]
+COPY EComputer/Api.csproj EComputer/
 
 # Восстанавливаем зависимости
 RUN dotnet restore "EComputer/Api.csproj"
 
 # Копируем остальные файлы проекта
-COPY . . 
+COPY EComputer/. EComputer/
 
 # Собираем проект
 WORKDIR "/src/EComputer"
